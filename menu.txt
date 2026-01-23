@@ -1,0 +1,3 @@
+PRIMI: pasta,risotto,gnocchi
+SECONDI: pollo,manzo,pesce
+COFFEE: normale,macchiato,decaffeinato,ginseng
