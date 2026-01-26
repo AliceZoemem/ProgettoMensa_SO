@@ -55,9 +55,7 @@ void stations_init(shm_t *shm) {
    Refill iniziale del giorno
    --------------------------------------------------------- */
 void stations_refill_day(shm_t *shm) {
-
     printf("[STATIONS] Refill iniziale del giorno...\n");
-
     /* PRIMI */
     for (int i = 0; i < shm->menu_primi_count; i++)
         shm->st_primi.porzioni[i] = shm->AVGREFILLPRIMI;
@@ -138,10 +136,10 @@ void stations_assign_workers(shm_t *shm) {
     }
 
     printf("[STATIONS] Postazioni assegnate:\n");
-    printf("  PRIMI:   %d\n", shm->st_primi.postazioni_totali);
-    printf("  SECONDI: %d\n", shm->st_secondi.postazioni_totali);
-    printf("  COFFEE:  %d\n", shm->st_coffee.postazioni_totali);
-    printf("  CASSA:   %d\n", shm->st_cassa.postazioni_totali);
+    printf("  PRIMI : operatori a lavoro %d\n", shm->st_primi.postazioni_totali);
+    printf("  SECONDI: operatori a lavoro %d\n", shm->st_secondi.postazioni_totali);
+    printf("  COFFEE:  operatori a lavoro %d\n", shm->st_coffee.postazioni_totali);
+    printf("  CASSA:   operatori a lavoro %d\n", shm->st_cassa.postazioni_totali);
 }
 
 /* ---------------------------------------------------------

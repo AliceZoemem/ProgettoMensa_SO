@@ -187,7 +187,9 @@ void serve_user(void) {
 
     if (st != NULL) {
         sem_wait(&st->mutex);
-
+        
+        printf("Porzioni disponibili shm: %d\n", shm->st_primi.porzioni[req.piatto_scelto]);
+        printf("Porzioni disponibili st: %d\n", st->porzioni[req.piatto_scelto]);
         if (st->porzioni[req.piatto_scelto] <= 0) {
             /* Piatto terminato */
             sem_post(&st->mutex);

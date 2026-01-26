@@ -131,7 +131,8 @@ int go_to_station(int station_type, int piatto) {
     req.richiesta_tipo = station_type;
     req.piatto_scelto = piatto;
     clock_gettime(CLOCK_REALTIME, &req.t_arrivo);
-
+    printf("[UTENTE %d] Richiede piatto %d alla stazione %d con richiesta tipo %d\n",
+           user_id, piatto, station_type, req.richiesta_tipo);
     /* Invia richiesta */
     if (msgsnd(msgid, &req, sizeof(req) - sizeof(long), 0) < 0) {
         perror("[UTENTE] msgsnd");

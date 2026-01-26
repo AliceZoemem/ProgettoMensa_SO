@@ -46,6 +46,12 @@ int main() {
         exit(EXIT_FAILURE);
     }
 
+    /* 1b. Carica menu */
+    if (load_menu() < 0) {
+        fprintf(stderr, "[MENSA] Errore caricamento menu\n");
+        exit(EXIT_FAILURE);
+    }
+
     /* 3. Crea stazioni */
     create_stations();
 
