@@ -35,17 +35,16 @@ void cleanup_and_exit(int code);
    MAIN
    --------------------------------------------------------- */
 int main() {
-
     printf("[MENSA] Avvio del processo responsabile...\n");
+
+    /* 2. Inizializza IPC */
+    init_ipc();
 
     /* 1. Carica configurazione */
     if (load_config() < 0) {
         fprintf(stderr, "[MENSA] Errore caricamento configurazione\n");
         exit(EXIT_FAILURE);
     }
-
-    /* 2. Inizializza IPC */
-    init_ipc();
 
     /* 3. Crea stazioni */
     create_stations();
@@ -73,19 +72,17 @@ int main() {
 
 void init_ipc(void) {
 
-    printf("[MENSA] Creazione shared memory...\n");
+    //printf("[MENSA] Creazione shared memory...\n");
     shm = ipc_create_shared_memory();
-    printf("DEBUG: shm = %p\n", (void*)shm);
-
     /* Esporta l’ID della shared memory per gli execve */
     char buf[32];
     sprintf(buf, "%d", shm->shm_id);
     setenv("MENSA_SHMID", buf, 1);
 
-    printf("[MENSA] Creazione semafori...\n");
+    //printf("[MENSA] Creazione semafori...\n");
     ipc_create_semaphores();
 
-    printf("[MENSA] Creazione code di messaggi...\n");
+    //printf("[MENSA] Creazione code di messaggi...\n");
     ipc_create_message_queues();
 }
 
@@ -97,14 +94,12 @@ void destroy_ipc(void) {
 }
 
 void create_stations(void) {
-    printf("[MENSA] Inizializzazione stazioni...\n");
+    //printf("[MENSA] Inizializzazione stazioni...\n");
     stations_init(shm);
 }
 
 void spawn_workers(void) {
-
-    printf("[MENSA] Creazione operatori...\n");
-
+    //printf("[MENSA] Creazione operatori...\n");
     operator_pids = calloc(shm->NOFWORKERS, sizeof(int));
 
     for (int i = 0; i < shm->NOFWORKERS; i++) {
@@ -131,9 +126,7 @@ void spawn_workers(void) {
 }
 
 void spawn_users(void) {
-
-    printf("[MENSA] Creazione utenti...\n");
-
+    //printf("[MENSA] Creazione utenti...\n");
     user_pids = calloc(shm->NOFUSERS, sizeof(int));
 
     for (int i = 0; i < shm->NOFUSERS; i++) {
@@ -156,8 +149,7 @@ void spawn_users(void) {
 }
 
 void wait_all_ready(void) {
-
-    printf("[MENSA] Attesa inizializzazione di operatori e utenti...\n");
+    //printf("[MENSA] Attesa inizializzazione di operatori e utenti...\n");
 
     ipc_wait_barrier();
 
@@ -195,7 +187,6 @@ void simulate_days(void) {
 }
 
 void start_new_day(int day) {
-
     printf("\n[MENSA] --- Inizio giorno %d ---\n", day);
 
     shm->giorno_corrente = day;
@@ -206,7 +197,6 @@ void start_new_day(int day) {
 }
 
 void end_day(int day) {
-
     printf("[MENSA] Fine giorno %d\n", day);
     stats_print_day(&shm->stats_giorno, day);
 
@@ -227,7 +217,6 @@ void terminate_simulation(int cause) {
 }
 
 void cleanup_and_exit(int code) {
-
     printf("[MENSA] Terminazione processi figli...\n");
 
     for (int i = 0; i < shm->NOFWORKERS; i++)

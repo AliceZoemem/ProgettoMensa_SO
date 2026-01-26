@@ -44,7 +44,7 @@ int main(int argc, char *argv[]) {
     user_id = atoi(argv[1]);
 
     /* Attacca shared memory */
-    shm = ipc_create_shared_memory();  // da sostituire con attach
+    shm = ipc_attach_shared_memory();
 
     /* Segnala che l’utente è pronto */
     ipc_signal_ready();
@@ -62,7 +62,7 @@ int main(int argc, char *argv[]) {
    Inizializzazione utente
    --------------------------------------------------------- */
 void user_init(int id) {
-    printf("[UTENTE %d] Avviato\n", id);
+    //printf("[UTENTE %d] Avviato\n", id);
     srand(time(NULL) ^ (getpid()<<16));
 
     /* Scelta menu (per ora casuale) */
@@ -218,10 +218,10 @@ void go_to_tavolo_and_eat(void) {
    --------------------------------------------------------- */
 int get_msg_queue(int station_type) {
     switch (station_type) {
-        case 0: return shm->st_primi.msgid;
-        case 1: return shm->st_secondi.msgid;
-        case 2: return shm->st_coffee.msgid;
-        case 3: return shm->st_cassa.msgid;
+        case 0: return shm->msgid_primi;
+        case 1: return shm->msgid_secondi;
+        case 2: return shm->msgid_coffee;
+        case 3: return shm->msgid_cassa;
     }
     return -1;
 }

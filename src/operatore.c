@@ -46,7 +46,7 @@ int main(int argc, char *argv[]) {
     station_type = atoi(argv[2]);
 
     /* Attacca shared memory */
-    //shm = ipc_attach_shared_memory();
+    shm = ipc_attach_shared_memory();
 
     /* Segnala che l’operatore è pronto */
     ipc_signal_ready();

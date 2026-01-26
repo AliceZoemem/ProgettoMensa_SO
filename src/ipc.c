@@ -151,7 +151,7 @@ void ipc_wait_barrier(void) {
         struct timespec t = {0, 1000000}; // 1ms
         nanosleep(&t, NULL);
     }
-
+    
     /* Sblocca tutti i processi */
     for (int i = 0; i < total; i++)
         sem_post(&shm->sem_barrier);
