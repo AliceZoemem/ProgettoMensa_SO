@@ -64,6 +64,15 @@ int main() {
     /* 6. Attende che tutti siano pronti */
     wait_all_ready();
 
+    /* 6b. Inizializza il primo giorno prima di sbloccare */
+    shm->giorno_corrente = 1;
+    stats_reset_day(&shm->stats_giorno);
+    stations_assign_workers(shm);
+    stations_refill_day(shm);
+
+    /* 6c. Sblocca barriera */
+    ipc_release_barrier();
+
     /* 7. Avvia simulazione */
     simulate_days();
 
@@ -195,11 +204,20 @@ void simulate_days(void) {
 void start_new_day(int day) {
     printf("\n[MENSA] --- Inizio giorno %d ---\n", day);
 
-    shm->giorno_corrente = day;
-    stats_reset_day(&shm->stats_giorno);
+    /* Per i giorni successivi al primo */
+    if (day > 1) {
+        shm->giorno_corrente = day;
+        stats_reset_day(&shm->stats_giorno);
+        stations_assign_workers(shm);
+        stations_refill_day(shm);
+    }
 
-    stations_assign_workers(shm);
-    stations_refill_day(shm);
+    /* Attiva simulazione e sblocca operatori/utenti */
+    shm->simulation_running = 1;
+    int total = shm->NOFWORKERS + shm->NOFUSERS;
+    for (int i = 0; i < total; i++) {
+        sem_post(&shm->sem_day_start);
+    }
 }
 
 void end_day(int day) {
@@ -213,11 +231,21 @@ void end_day(int day) {
 void terminate_simulation(int cause) {
 
     shm->terminazione_causa = cause;
+    shm->simulation_running = 0;
 
     printf("\n[MENSA] Terminazione simulazione: %s\n",
-           cause == 0 ? "TIMEOUT" : "OVERLOAD");
+           cause == 0 ? "COMPLETATA" : "OVERLOAD");
 
     stats_print_final(&shm->stats_tot);
+
+    /* Sblocca eventuali processi in attesa */
+    int total = shm->NOFWORKERS + shm->NOFUSERS;
+    for (int i = 0; i < total; i++) {
+        sem_post(&shm->sem_day_start);
+    }
+
+    /* Breve pausa per permettere ai processi di terminare */
+    sleep(1);
 
     cleanup_and_exit(EXIT_SUCCESS);
 }

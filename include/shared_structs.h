@@ -23,7 +23,8 @@ typedef struct {
 } msg_request_t;
 
 typedef struct {
-    long mtype;               // tipo messaggio (utente)
+    long mtype;               // tipo messaggio (utente)           
+    int user_id;
     int esito;                // 0=ok, 1=piatto terminato, 2=nessun piatto disponibile
     int piatto_servito;       // indice piatto effettivamente servito
     struct timespec t_servizio; // timestamp inizio servizio
@@ -138,6 +139,10 @@ typedef struct {
     /* Barriera di avvio */
     int ready_count;
     sem_t sem_barrier;
+
+    /* Controllo simulazione */
+    int simulation_running;     // 1=in corso, 0=terminata
+    sem_t sem_day_start;        // segnala inizio giornata
 
     /* Code di messaggi */
     int msgid_primi;

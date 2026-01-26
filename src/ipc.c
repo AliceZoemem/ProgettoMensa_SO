@@ -94,6 +94,15 @@ void ipc_create_semaphores(void) {
         exit(EXIT_FAILURE);
     }
 
+    /* Semaforo inizio giornata */
+    if (sem_init(&shm->sem_day_start, 1, 0) < 0) {
+        perror("[IPC] sem_init day_start");
+        exit(EXIT_FAILURE);
+    }
+
+    /* Inizializza flag simulazione */
+    shm->simulation_running = 0;
+
     /* Mutex stazioni */
     init_station_semaphore(&shm->st_primi);
     init_station_semaphore(&shm->st_secondi);
@@ -104,6 +113,7 @@ void ipc_create_semaphores(void) {
 void ipc_destroy_semaphores(void) {
     sem_destroy(&shm->sem_tavoli);
     sem_destroy(&shm->sem_barrier);
+    sem_destroy(&shm->sem_day_start);
 
     sem_destroy(&shm->st_primi.mutex);
     sem_destroy(&shm->st_secondi.mutex);
@@ -151,6 +161,10 @@ void ipc_wait_barrier(void) {
         struct timespec t = {0, 1000000}; // 1ms
         nanosleep(&t, NULL);
     }
+}
+
+void ipc_release_barrier(void) {
+    int total = shm->NOFWORKERS + shm->NOFUSERS;
     
     /* Sblocca tutti i processi */
     for (int i = 0; i < total; i++)

@@ -16,5 +16,6 @@ void ipc_destroy_message_queues(void);
 
 void ipc_signal_ready(void);
 void ipc_wait_barrier(void);
+void ipc_release_barrier(void);
 
 #endif

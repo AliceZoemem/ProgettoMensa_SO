@@ -5,6 +5,7 @@
 #include <time.h>
 #include <signal.h>
 #include <string.h>
+#include <errno.h>
 #include <sys/msg.h>
 
 #include "shared_structs.h"
@@ -73,7 +74,10 @@ void operator_init(int id, int st_type) {
    --------------------------------------------------------- */
 void operator_loop(void) {
 
-    while (1) {
+    /* Attendi inizio giornata */
+    sem_wait(&shm->sem_day_start);
+
+    while (shm->simulation_running) {
 
         /* 1. Acquisisce una postazione */
         if (!acquire_station_post())
@@ -174,8 +178,20 @@ void serve_user(void) {
     msg_request_t req;
     msg_response_t res;
 
-    /* Attende un utente */
-    if (msgrcv(msgid, &req, sizeof(req) - sizeof(long), 0, 0) < 0) {
+    /* Attende un utente con timeout per controllare periodicamente simulation_running */
+    size_t req_size = sizeof(msg_request_t) - sizeof(long);
+    ssize_t received = msgrcv(msgid, &req, req_size, 0, IPC_NOWAIT);
+    
+    if (received < 0) {
+        if (errno == ENOMSG) {
+            /* Nessun messaggio disponibile, breve pausa */
+            nanosleep(&(struct timespec){0, 10000000}, NULL); // 10ms
+            return;
+        }
+        /* Altri errori */
+        if (!shm->simulation_running) {
+            return;
+        }
         perror("[OPERATORE] msgrcv");
         return;
     }
@@ -187,16 +203,14 @@ void serve_user(void) {
 
     if (st != NULL) {
         sem_wait(&st->mutex);
-        
-        printf("Porzioni disponibili shm: %d\n", shm->st_primi.porzioni[req.piatto_scelto]);
-        printf("Porzioni disponibili st: %d\n", st->porzioni[req.piatto_scelto]);
         if (st->porzioni[req.piatto_scelto] <= 0) {
             /* Piatto terminato */
             sem_post(&st->mutex);
 
             res.mtype = req.user_id;
             res.esito = 1; // piatto terminato
-            msgsnd(msgid, &res, sizeof(res) - sizeof(long), 0);
+            size_t res_size = sizeof(msg_response_t) - sizeof(long);
+            msgsnd(msgid, &res, res_size, 0);
             return;
         }
 
@@ -217,7 +231,8 @@ void serve_user(void) {
     res.piatto_servito = req.piatto_scelto;
     clock_gettime(CLOCK_REALTIME, &res.t_servizio);
 
-    msgsnd(msgid, &res, sizeof(res) - sizeof(long), 0);
+    size_t res_size = sizeof(msg_response_t) - sizeof(long);
+    msgsnd(msgid, &res, res_size, 0);
 
     /* Aggiorna statistiche */
     update_stats_on_service(&req, &res);
