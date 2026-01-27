@@ -73,7 +73,6 @@ void operator_init(int id, int st_type) {
    Ciclo principale dell’operatore
    --------------------------------------------------------- */
 void operator_loop(void) {
-
     /* Attendi inizio giornata */
     sem_wait(&shm->sem_day_start);
 
@@ -114,7 +113,6 @@ int acquire_station_post(void) {
         sem_wait(&st->mutex);
 
         if (st->postazioni_occupate < st->postazioni_totali) {
-
             /* Se è il primo operatore attivo, aggiorna statistiche */
             if (st->postazioni_occupate == 0)
                 shm->stats_giorno.operatori_attivi++;
@@ -292,21 +290,23 @@ void update_stats_on_service(msg_request_t *req, msg_response_t *res) {
         case 0:
             day->tempo_attesa_primi_ns += wait_ns;
             day->piatti_primi_serviti++;
+            day->ricavo_giornaliero += shm->PRICEPRIMI;
             break;
 
         case 1:
             day->tempo_attesa_secondi_ns += wait_ns;
             day->piatti_secondi_serviti++;
+            day->ricavo_giornaliero += shm->PRICESECONDI;
             break;
 
         case 2:
             day->tempo_attesa_coffee_ns += wait_ns;
             day->piatti_coffee_serviti++;
+            day->ricavo_giornaliero += shm->PRICECOFFEE;
             break;
 
         case 3:
             day->tempo_attesa_cassa_ns += wait_ns;
-            /* ricavo: da definire in base ai piatti scelti */
             break;
     }
 

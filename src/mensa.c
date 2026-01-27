@@ -86,18 +86,13 @@ int main() {
    --------------------------------------------------------- */
 
 void init_ipc(void) {
-
-    //printf("[MENSA] Creazione shared memory...\n");
     shm = ipc_create_shared_memory();
-    /* Esporta l’ID della shared memory per gli execve */
     char buf[32];
     sprintf(buf, "%d", shm->shm_id);
     setenv("MENSA_SHMID", buf, 1);
 
-    //printf("[MENSA] Creazione semafori...\n");
     ipc_create_semaphores();
 
-    //printf("[MENSA] Creazione code di messaggi...\n");
     ipc_create_message_queues();
 }
 
@@ -109,12 +104,10 @@ void destroy_ipc(void) {
 }
 
 void create_stations(void) {
-    //printf("[MENSA] Inizializzazione stazioni...\n");
     stations_init(shm);
 }
 
 void spawn_workers(void) {
-    //printf("[MENSA] Creazione operatori...\n");
     operator_pids = calloc(shm->NOFWORKERS, sizeof(int));
 
     for (int i = 0; i < shm->NOFWORKERS; i++) {
@@ -181,7 +174,7 @@ void simulate_days(void) {
 
         /* Simulazione del giorno:
            1 minuto = NNANOSECS nanosecondi
-           un giorno = 240 minuti (esempio)
+           un giorno = 240 minuti -> 4h di lavoro
         */
         long day_ns = shm->NNANOSECS * 60 * 240;
 
@@ -224,8 +217,8 @@ void end_day(int day) {
     printf("[MENSA] Fine giorno %d\n", day);
     stats_print_day(&shm->stats_giorno, day);
 
-    /* Aggiorna statistiche totali */
-    // (da implementare in stats.c)
+    stats_update_totals(&shm->stats_tot, &shm->stats_giorno);
+    shm->simulation_running = 0;
 }
 
 void terminate_simulation(int cause) {
