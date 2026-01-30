@@ -2,11 +2,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include "shared_structs.h"
 #include "config.h"
 
 
 extern shm_t *shm;
+
+/* Helper: verifica se stringa è composta solo da spazi */
+static int is_only_whitespace(const char *str) {
+    if (!str) return 1;
+    while (*str) {
+        if (!isspace((unsigned char)*str))
+            return 0;
+        str++;
+    }
+    return 1;
+}
 
 int load_config(void) {
     return load_config_from_file("config.txt");
@@ -116,6 +128,11 @@ int load_config_from_file(const char *filename) {
 }
 
 int load_menu(void) {
+    /* Inizializza contatori a zero */
+    shm->menu_primi_count = 0;
+    shm->menu_secondi_count = 0;
+    shm->menu_coffee_count = 0;
+    
     FILE *f = fopen("menu.txt", "r");
     if (!f) {
         perror("[CONFIG] Impossibile aprire menu.txt");
@@ -128,8 +145,15 @@ int load_menu(void) {
             int count = 0;
             char *tok = strtok(line + 6, ",\n");
             while (tok && count < MAX_PRIMI_TYPES) {
-                shm->menu_primi[count++] = strdup(tok);
+                if (!is_only_whitespace(tok)) {
+                    shm->menu_primi[count++] = strdup(tok);
+                }
                 tok = strtok(NULL, ",\n");
+            }
+            if(count == 0) {
+                fprintf(stderr, "[CONFIG] ERRORE: Nessun piatto primo nel menu!\n");
+                fclose(f);
+                return -1;
             }
             shm->menu_primi_count = count;
         }
@@ -138,8 +162,15 @@ int load_menu(void) {
             int count = 0;
             char *tok = strtok(line + 8, ",\n");
             while (tok && count < MAX_SECONDI_TYPES) {
-                shm->menu_secondi[count++] = strdup(tok);
+                if (!is_only_whitespace(tok)) {
+                    shm->menu_secondi[count++] = strdup(tok);
+                }
                 tok = strtok(NULL, ",\n");
+            }
+            if(count == 0) {
+                fprintf(stderr, "[CONFIG] Errore: nessun piatto secondo nel menu\n");
+                fclose(f);
+                return -1;
             }
             shm->menu_secondi_count = count;
         }
@@ -148,13 +179,34 @@ int load_menu(void) {
             int count = 0;
             char *tok = strtok(line + 7, ",\n");
             while (tok && count < 4) {
-                shm->menu_coffee[count++] = strdup(tok);
+                if (!is_only_whitespace(tok)) {
+                    shm->menu_coffee[count++] = strdup(tok);
+                }
                 tok = strtok(NULL, ",\n");
+            }
+            if(count == 0) {
+                fprintf(stderr, "[CONFIG] Errore: nessun caffè/dolce nel menu\n");
+                fclose(f);
+                return -1;
             }
             shm->menu_coffee_count = count;
         }
     }
 
     fclose(f);
+    
+    if (shm->menu_primi_count == 0) {
+        fprintf(stderr, "[CONFIG] Errore: menu non valido - mancano i primi\n");
+        return -1;
+    }
+    if (shm->menu_secondi_count == 0) {
+        fprintf(stderr, "[CONFIG] Errore: menu non valido - mancano i secondi\n");
+        return -1;
+    }
+    if (shm->menu_coffee_count== 0) {
+        fprintf(stderr, "[CONFIG] Errore: menu non valido - mancano i caffe\n");
+        return -1;
+    }
+    
     return 0;
 }

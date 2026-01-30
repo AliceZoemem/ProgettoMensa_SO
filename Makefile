@@ -38,7 +38,7 @@ utente: $(OBJ_DIR)/utente.o $(OBJS_COMMON)
 	$(CC) $(CFLAGS) $(INCLUDES) -o utente $(OBJ_DIR)/utente.o $(OBJS_COMMON) $(LDFLAGS)
 
 # ------------------------------------------------------------
-# Regola generica per compilare i .c in obj/
+# Compilare i .c in obj/
 # ------------------------------------------------------------
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	mkdir -p $(OBJ_DIR)

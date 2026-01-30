@@ -170,7 +170,7 @@ void simulate_days(void) {
         }
 
         end_day(day);
-
+        
         /* Controllo overload: troppi utenti in attesa */
         if (shm->stats_giorno.utenti_in_attesa > shm->OVERLOADTHRESHOLD) {
             printf("\n[MENSA] OVERLOAD RILEVATO!\n");
@@ -233,16 +233,11 @@ void end_day(int day) {
     printf("[MENSA] Tutti gli utenti hanno completato il giorno\n");
     nanosleep(&(struct timespec){0, 100000000}, NULL);
     
-    int utenti_in_attesa = shm->st_primi.utenti_in_coda + 
-                           shm->st_secondi.utenti_in_coda + 
-                           shm->st_coffee.utenti_in_coda + 
-                           shm->st_cassa.utenti_in_coda;
+    printf("[MENSA] Utenti in attesa a fine giornata: %d\n", shm->stats_giorno.utenti_in_attesa);
     
-    shm->stats_giorno.utenti_in_attesa = utenti_in_attesa;
-    
-    if (utenti_in_attesa > 0) {
-        printf("[MENSA] ATTENZIONE: %d utenti ancora in attesa a fine giornata\n", 
-               utenti_in_attesa);
+    if (shm->stats_giorno.utenti_in_attesa > 0) {
+        printf("[MENSA] ATTENZIONE: %d utenti non hanno completato il servizio\n", 
+               shm->stats_giorno.utenti_in_attesa);
     }
     stations_compute_leftovers(shm);
     

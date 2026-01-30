@@ -1,3 +1,3 @@
 PRIMI: pasta,risotto,gnocchi
-SECONDI: pollo,manzo,pesce
+SECONDI: pollo e patate,manzo e broccoli,pesce e arance
 COFFEE: normale,macchiato,decaffeinato,ginseng

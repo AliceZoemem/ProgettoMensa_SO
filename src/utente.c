@@ -48,7 +48,6 @@ int main(int argc, char *argv[]) {
 }
 
 static void user_init() {
-    printf("[UTENTE %d] Avviato\n", user_id);
     srand(time(NULL) ^ (getpid() << 16));
 
     want_primo   = 1;
@@ -60,10 +59,10 @@ static void user_loop(void) {
     while (1) {
         sem_wait(&shm->sem_day_start);
         
-        printf("[UTENTE %d] Giornata iniziata\n", user_id);
+        //printf("[UTENTE %d] Giornata iniziata\n", user_id);
 
         if (!shm->simulation_running) {
-            printf("[UTENTE %d] Simulazione terminata, esco\n", user_id);
+            //printf("[UTENTE %d] Simulazione terminata, esco\n", user_id);
             break;
         }
 
@@ -104,6 +103,7 @@ static void user_loop(void) {
             printf("[UTENTE %d] Nessun piatto disponibile (primi e secondi esauriti), abbandono il giorno\n", user_id);
             sem_wait(&shm->sem_stats);
             shm->stats_giorno.utenti_non_serviti++;
+            shm->stats_giorno.utenti_in_attesa++;
             sem_post(&shm->sem_stats);
             
             __sync_fetch_and_add(&shm->day_barrier_count, 1);
@@ -125,6 +125,7 @@ static void user_loop(void) {
             printf("[UTENTE %d] Impossibile pagare, abbandono il giorno\n", user_id);
             sem_wait(&shm->sem_stats);
             shm->stats_giorno.utenti_non_serviti++;
+            shm->stats_giorno.utenti_in_attesa++;
             sem_post(&shm->sem_stats);
 
             __sync_fetch_and_add(&shm->day_barrier_count, 1);
@@ -149,14 +150,12 @@ static void user_loop(void) {
 
 static int end_day_while_waiting() {
     if (!shm->simulation_running) {
-        printf("[UTENTE %d] Giornata terminata, abbandono\n", user_id);
         sem_wait(&shm->sem_stats);
         shm->stats_giorno.utenti_non_serviti++;
+        shm->stats_giorno.utenti_in_attesa++;
         sem_post(&shm->sem_stats);
         
         __sync_fetch_and_add(&shm->day_barrier_count, 1);
-        printf("[UTENTE %d] Attendo fine giornata... (%d/%d)\n", 
-               user_id, shm->day_barrier_count, shm->NOFUSERS);
         while (shm->day_barrier_count < shm->NOFUSERS && shm->simulation_running) {
             nanosleep(&(struct timespec){0, 10000000}, NULL);
         }
@@ -347,6 +346,7 @@ static void go_to_tavolo_and_eat(void) {
             printf("[UTENTE %d] Giornata terminata mentre cercavo tavolo, non servito\n", user_id);
             sem_wait(&shm->sem_stats);
             shm->stats_giorno.utenti_non_serviti++;
+            shm->stats_giorno.utenti_in_attesa++;
             sem_post(&shm->sem_stats);
             return;
         }
@@ -376,14 +376,10 @@ static void go_to_tavolo_and_eat(void) {
     
     printf("[UTENTE %d] Posto a tavola acquisito (tavoli liberi ora: %d/%d)\n", 
            user_id, shm->tavoli_liberi, shm->NOFTABLESEATS);
-
-    printf("[UTENTE %d] Si è seduto a mangiare (Primo:%d Secondo:%d Coffee:%d)\n", 
-           user_id, got_primo, got_secondo, got_coffee);
     
     int piatti = got_primo + got_secondo + got_coffee;
     int eat_ms = piatti * 1500; // 1.5 secondi per piatto
 
-    /* Mangia con controllo interruzione */
     struct timespec eat_time;
     eat_time.tv_sec  = eat_ms / 1000;
     eat_time.tv_nsec = (eat_ms % 1000) * 1000000L;

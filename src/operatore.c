@@ -210,10 +210,10 @@ void serve_user(void) {
         return;
     }
     
-    if (station_type == 3) {
+    /*if (station_type == 3) {
         printf("[CASSIERE %d] Ricevuto richiesta da utente %d (Primo:%d Secondo:%d Coffee:%d)\n",
                operator_id, req.user_id, req.ha_primo, req.ha_secondo, req.ha_coffee);
-    }
+    }*/
     
     if (req.user_id < 0 || req.user_id >= shm->NOFUSERS || 
         req.richiesta_tipo < 0 || req.richiesta_tipo > 3) {
@@ -259,10 +259,10 @@ void serve_user(void) {
     res.piatto_servito = req.piatto_scelto;
     res.t_servizio = t_inizio_servizio;
 
-    if (station_type == 3) {
+    /*if (station_type == 3) {
         printf("[CASSIERE %d] Invio risposta a utente %d: esito=%d, mtype=%ld\n",
                operator_id, req.user_id, res.esito, res.mtype);
-    }
+    }*/
 
     size_t res_size = MSG_RES_SIZE;
     if (msgsnd(msgid, &res, res_size, 0) < 0) {
@@ -348,10 +348,10 @@ void update_stats_on_service(msg_request_t *req, msg_response_t *res) {
             
             day->ricavo_giornaliero += totale;
             
-            printf("[CASSIERE %d] Utente %d - Primo:%d Secondo:%d Coffee:%d - Totale: %.2f€\n",
+            /*printf("[CASSIERE %d] Utente %d - Primo:%d Secondo:%d Coffee:%d - Totale: %.2f€\n",
                    operator_id, req->user_id, req->ha_primo, req->ha_secondo, 
                    req->ha_coffee, totale);
-            
+            */
             day->utenti_serviti++;
             break;
     }
