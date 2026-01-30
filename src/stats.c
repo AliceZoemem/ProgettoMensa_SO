@@ -3,22 +3,12 @@
 #include "shared_structs.h"
 #include "stats.h"
 
-
-/* ---------------------------------------------------------
-   Reset statistiche giornaliere
-   --------------------------------------------------------- */
 void stats_reset_day(stats_t *s) {
-
     memset(s, 0, sizeof(stats_t));
-
     s->ricavo_giornaliero = 0.0;
 }
 
-/* ---------------------------------------------------------
-   Aggiornamento statistiche totali
-   --------------------------------------------------------- */
 void stats_update_totals(stats_t *tot, stats_t *day) {
-
     tot->utenti_serviti      += day->utenti_serviti;
     tot->utenti_non_serviti  += day->utenti_non_serviti;
 
@@ -40,9 +30,6 @@ void stats_update_totals(stats_t *tot, stats_t *day) {
     tot->ricavo_giornaliero += day->ricavo_giornaliero;
 }
 
-/* ---------------------------------------------------------
-   Stampa statistiche giornaliere
-   --------------------------------------------------------- */
 void stats_print_day(stats_t *s, int day) {
 
     printf("\n================== STATISTICHE GIORNO %d ==================\n", day);
@@ -80,14 +67,10 @@ void stats_print_day(stats_t *s, int day) {
     printf("===========================================================\n\n");
 }
 
-/* ---------------------------------------------------------
-   Stampa statistiche finali
-   --------------------------------------------------------- */
 void stats_print_final(stats_t *tot, int giorni) {
 
     printf("\n================== STATISTICHE FINALI ==================\n");
 
-    /* Utenti */
     printf("\nUTENTI:\n");
     printf("Utenti serviti totali:     %d\n", tot->utenti_serviti);
     printf("Utenti non serviti totali: %d\n", tot->utenti_non_serviti);
@@ -98,7 +81,6 @@ void stats_print_final(stats_t *tot, int giorni) {
                (double)tot->utenti_non_serviti / giorni);
     }
 
-    /* Piatti serviti */
     printf("\nPIATTI DISTRIBUITI:\n");
     int tot_piatti_serviti = tot->piatti_primi_serviti + 
                              tot->piatti_secondi_serviti + 
@@ -115,7 +97,6 @@ void stats_print_final(stats_t *tot, int giorni) {
         printf("  Coffee/Dolci:          %.2f\n", (double)tot->piatti_coffee_serviti / giorni);
     }
 
-    /* Piatti avanzati */
     printf("\nPIATTI AVANZATI:\n");
     int tot_piatti_avanzati = tot->piatti_primi_avanzati + 
                               tot->piatti_secondi_avanzati;
@@ -129,7 +110,6 @@ void stats_print_final(stats_t *tot, int giorni) {
         printf("  Secondi:               %.2f\n", (double)tot->piatti_secondi_avanzati / giorni);
     }
 
-    /* Tempi di attesa */
     printf("\nTEMPI MEDI DI ATTESA:\n");
     
     if (tot->utenti_serviti > 0) {
@@ -149,7 +129,6 @@ void stats_print_final(stats_t *tot, int giorni) {
         printf("Nessun utente servito\n");
     }
 
-    /* Operatori e pause */
     printf("\nOPERATORI:\n");
     printf("Operatori attivi totali:     %d\n", tot->operatori_attivi);
     printf("Pause totali:                %d\n", tot->pause_totali);
@@ -157,7 +136,6 @@ void stats_print_final(stats_t *tot, int giorni) {
         printf("Pause medie per giornata:    %.2f\n", (double)tot->pause_totali / giorni);
     }
 
-    /* Ricavi */
     printf("\nRICAVI:\n");
     printf("Ricavo totale:               %.2f €\n", tot->ricavo_giornaliero);
     if (giorni > 0) {

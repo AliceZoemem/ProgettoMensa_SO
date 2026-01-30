@@ -269,8 +269,10 @@ void serve_user(void) {
         return;
     }
     
-    //printf("[OPERATORE %d] Ricevuto messaggio: user_id=%d, tipo=%d, received=%zd bytes\n",
-    //       operator_id, req.user_id, req.richiesta_tipo, received);
+    if (station_type == 3) {
+        printf("[CASSIERE %d] Ricevuto richiesta da utente %d (Primo:%d Secondo:%d Coffee:%d)\n",
+               operator_id, req.user_id, req.ha_primo, req.ha_secondo, req.ha_coffee);
+    }
     
     /* Debug: verifica che il messaggio sia valido */
     if (req.user_id < 0 || req.user_id >= shm->NOFUSERS || 
@@ -291,7 +293,7 @@ void serve_user(void) {
             /* Piatto terminato */
             sem_post(&st->mutex);
             memset(&res, 0, sizeof(res));
-            res.mtype = req.user_id + 1;   // così l'utente filtra per user_id
+            res.mtype = req.user_id+ 10000;   // così l'utente filtra per user_id
             res.user_id = req.user_id;
             res.esito = 1; // piatto terminato
             size_t res_size = MSG_RES_SIZE;
@@ -320,11 +322,16 @@ void serve_user(void) {
 
     /* Risposta */
     memset(&res, 0, sizeof(res));
-    res.mtype         = req.user_id + 1;   
+    res.mtype         = req.user_id+ 10000;   
     res.user_id = req.user_id;
     res.esito = 0;
     res.piatto_servito = req.piatto_scelto;
     res.t_servizio = t_inizio_servizio;
+
+    if (station_type == 3) {
+        printf("[CASSIERE %d] Invio risposta a utente %d: esito=%d, mtype=%ld\n",
+               operator_id, req.user_id, res.esito, res.mtype);
+    }
 
     size_t res_size = MSG_RES_SIZE;
     if (msgsnd(msgid, &res, res_size, 0) < 0) {

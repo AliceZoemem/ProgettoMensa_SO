@@ -11,14 +11,12 @@
 #include "stations.h"
 #include "stats.h"
 #include "util.h"
+#include <sys/msg.h>
 
 extern shm_t *shm;
 int *operator_pids = NULL;
 int *user_pids = NULL;
 
-/* ---------------------------------------------------------
-   Funzioni interne
-   --------------------------------------------------------- */
 void init_ipc(void);
 void destroy_ipc(void);
 void create_stations(void);
@@ -31,17 +29,10 @@ void end_day(int day);
 void terminate_simulation(int cause);
 void cleanup_and_exit(int code);
 
-/* ---------------------------------------------------------
-   MAIN
-   --------------------------------------------------------- */
 int main(int argc, char *argv[]) {
     printf("[MENSA] Avvio del processo responsabile...\n");
-
-    /* 2. Inizializza IPC */
     init_ipc();
 
-    /* 1. Carica configurazione */
-    /* Se specificato, usa il file di configurazione custom */
     if (argc > 1) {
         printf("[MENSA] Usando file di configurazione: %s\n", argv[1]);
         if (load_config_from_file(argv[1]) < 0) {
@@ -55,53 +46,38 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    /* 1b. Carica menu */
     if (load_menu() < 0) {
         fprintf(stderr, "[MENSA] Errore caricamento menu\n");
         exit(EXIT_FAILURE);
     }
 
-    /* 3. Crea stazioni */
     create_stations();
 
-    /* 4. Crea operatori */
     spawn_workers();
 
-    /* 5. Crea utenti */
     spawn_users();
 
-    /* 6. Attende che tutti siano pronti */
     wait_all_ready();
 
-    /* 6b. Inizializza il primo giorno prima di sbloccare */
     shm->giorno_corrente = 1;
     stats_reset_day(&shm->stats_giorno);
     stations_assign_workers(shm);
     stations_refill_day(shm);
 
-    /* 6c. Sblocca barriera */
     ipc_release_barrier();
 
-    /* 7. Avvia simulazione */
     simulate_days();
 
-    /* 8. Terminazione */
     cleanup_and_exit(EXIT_SUCCESS);
     return 0;
 }
-
-/* ---------------------------------------------------------
-   IMPLEMENTAZIONI
-   --------------------------------------------------------- */
 
 void init_ipc(void) {
     shm = ipc_create_shared_memory();
     char buf[32];
     sprintf(buf, "%d", shm->shm_id);
     setenv("MENSA_SHMID", buf, 1);
-
     ipc_create_semaphores();
-
     ipc_create_message_queues();
 }
 
@@ -118,17 +94,12 @@ void create_stations(void) {
 
 void spawn_workers(void) {
     operator_pids = calloc(shm->NOFWORKERS, sizeof(int));
-
     for (int i = 0; i < shm->NOFWORKERS; i++) {
 
         pid_t pid = fork();
         if (pid == 0) {
-
-            /* Figlio → exec operatore */
             char idbuf[16], stbuf[16];
             sprintf(idbuf, "%d", i);
-
-            /* Per ora assegniamo round‑robin, poi stations_assign_workers() farà il mapping reale */
             sprintf(stbuf, "%d", i % 4);
 
             char *args[] = { "operatore", idbuf, stbuf, NULL };
@@ -143,14 +114,11 @@ void spawn_workers(void) {
 }
 
 void spawn_users(void) {
-    //printf("[MENSA] Creazione utenti...\n");
     user_pids = calloc(shm->NOFUSERS, sizeof(int));
 
     for (int i = 0; i < shm->NOFUSERS; i++) {
-
         pid_t pid = fork();
         if (pid == 0) {
-
             char idbuf[16];
             sprintf(idbuf, "%d", i);
 
@@ -160,13 +128,12 @@ void spawn_users(void) {
             perror("exec utente");
             exit(EXIT_FAILURE);
         }
-
         user_pids[i] = pid;
     }
 }
 
 void wait_all_ready(void) {
-    //printf("[MENSA] Attesa inizializzazione di operatori e utenti...\n");
+    printf("[MENSA] Attesa inizializzazione di operatori e utenti...\n");
 
     ipc_wait_barrier();
 
@@ -174,11 +141,8 @@ void wait_all_ready(void) {
 }
 
 void simulate_days(void) {
-
     printf("[MENSA] Simulazione per %d giorni...\n", shm->SIMDURATION);
-
     for (int day = 1; day <= shm->SIMDURATION; day++) {
-
         start_new_day(day);
 
         /* Simulazione del giorno:
@@ -187,18 +151,16 @@ void simulate_days(void) {
            Refill periodico ogni 10 minuti
         */
         long total_minutes = 240;  // 4 ore = 240 minuti
-        long refill_interval = 10; // refill ogni 10 minuti
+        long refill_interval = 10;
         long minute_ns = shm->NNANOSECS * 60;
         long refill_interval_ns = minute_ns * refill_interval;
 
         for (long elapsed_minutes = 0; elapsed_minutes < total_minutes; elapsed_minutes += refill_interval) {
-            /* Attendi 10 minuti simulati */
             nanosleep(&(struct timespec){
                 .tv_sec = refill_interval_ns / 1000000000,
                 .tv_nsec = refill_interval_ns % 1000000000
             }, NULL);
 
-            /* Refill periodico se il giorno è ancora attivo */
             if (shm->simulation_running) {
                 stations_refill_periodic(shm);
             }
@@ -220,10 +182,24 @@ void simulate_days(void) {
     terminate_simulation(0);  // 0 = TIMEOUT
 }
 
+void clear_message_queues(void) {
+    struct {
+        long mtype;
+        char mtext[1024];
+    } dummy_msg;
+    
+    int queues[] = {shm->msgid_primi, shm->msgid_secondi, shm->msgid_coffee, shm->msgid_cassa};
+    
+    for (int i = 0; i < 4; i++) {
+        while (msgrcv(queues[i], &dummy_msg, sizeof(dummy_msg.mtext), 0, IPC_NOWAIT | MSG_NOERROR) >= 0) {
+        }
+    }
+}
+
 void start_new_day(int day) {
     printf("\n[MENSA] --- Inizio giorno %d ---\n", day);
+    clear_message_queues();
 
-    /* Per i giorni successivi al primo */
     if (day > 1) {
         shm->giorno_corrente = day;
         stats_reset_day(&shm->stats_giorno);
@@ -231,10 +207,8 @@ void start_new_day(int day) {
         stations_refill_day(shm);
     }
 
-    /* Imposta operatori attivi per questo giorno */
     shm->stats_giorno.operatori_attivi = shm->NOFWORKERS;
 
-    /* Attiva simulazione e sblocca operatori/utenti */
     shm->simulation_running = 1;
     int total = shm->NOFWORKERS + shm->NOFUSERS;
     for (int i = 0; i < total; i++) {
@@ -245,7 +219,8 @@ void start_new_day(int day) {
 void end_day(int day) {
     printf("[MENSA] Fine giorno %d\n", day);
     
-    /* Calcola gli utenti ancora in attesa nelle varie code */
+    nanosleep(&(struct timespec){0, 100000000}, NULL);
+    
     int utenti_in_attesa = shm->st_primi.utenti_in_coda + 
                            shm->st_secondi.utenti_in_coda + 
                            shm->st_coffee.utenti_in_coda + 
@@ -257,8 +232,6 @@ void end_day(int day) {
         printf("[MENSA] ATTENZIONE: %d utenti ancora in attesa a fine giornata\n", 
                utenti_in_attesa);
     }
-    
-    /* Calcola i piatti avanzati */
     stations_compute_leftovers(shm);
     
     stats_print_day(&shm->stats_giorno, day);
@@ -295,7 +268,6 @@ void terminate_simulation(int cause) {
         sem_post(&shm->sem_day_start);
     }
 
-    /* Breve pausa per permettere ai processi di terminare */
     sleep(1);
 
     cleanup_and_exit(EXIT_SUCCESS);

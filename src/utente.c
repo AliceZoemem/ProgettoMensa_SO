@@ -87,10 +87,16 @@ static void user_init() {
 static void user_loop(void) {
     while (1) {
         /* Attendi inizio giornata */
+        printf("[UTENTE %d] In attesa di inizio giornata (simulation_running=%d)\n", 
+               user_id, shm->simulation_running);
         sem_wait(&shm->sem_day_start);
+        
+        printf("[UTENTE %d] Giornata iniziata (simulation_running=%d)\n", 
+               user_id, shm->simulation_running);
 
         /* Se la simulazione è terminata, esci */
         if (!shm->simulation_running) {
+            printf("[UTENTE %d] Simulazione terminata, esco\n", user_id);
             break;
         }
 
@@ -226,11 +232,17 @@ static int go_to_station(int station_type, int piatto) {
             return 0;
         }
 
-        /* QUI: mtype = user_id + 1 */
-        received = msgrcv(msgid, &res, res_size, user_id + 1, IPC_NOWAIT | MSG_NOERROR);
+        /* QUI: mtype = user_id+ 10000 */
+        received = msgrcv(msgid, &res, res_size, user_id+ 10000, IPC_NOWAIT | MSG_NOERROR);
 
-        if (received >= 0)
+        if (received >= 0) {
+            if (res.user_id != user_id) {
+                //printf("[UTENTE %d] ATTENZIONE: Ricevuto messaggio per utente %d alla stazione %d, ignoro\n",
+                //       user_id, res.user_id, station_type);
+                continue;  
+            }
             break;
+        }
 
         if (errno != ENOMSG) {
             fprintf(stderr, "[UTENTE DEBUG] msgrcv fallita: msgid=%d, res_size=%zu, mtype=%d, errno=%d\n",
@@ -350,12 +362,20 @@ static int go_to_cassa(void) {
         }
         
         /* Prova a ricevere con IPC_NOWAIT e MSG_NOERROR */
-        received = msgrcv(msgid, &res, res_size, user_id + 1, IPC_NOWAIT | MSG_NOERROR);
+        received = msgrcv(msgid, &res, res_size, user_id+ 10000, IPC_NOWAIT | MSG_NOERROR);
         
         if (received >= 0) {
             /* Messaggio ricevuto */
-            printf("[UTENTE %d] Ricevuto risposta dalla cassa: esito=%d, received=%zd bytes\n",
-                   user_id, res.esito, received);
+            printf("[UTENTE %d] Ricevuto risposta dalla cassa: esito=%d, received=%zd bytes, user_id_risposta=%d\n",
+                   user_id, res.esito, received, res.user_id);
+            
+            /* Verifica che la risposta sia per questo utente */
+            if (res.user_id != user_id) {
+                printf("[UTENTE %d] ATTENZIONE: Ricevuto messaggio per utente %d, ignoro\n",
+                       user_id, res.user_id);
+                continue;  /* Continua ad aspettare la risposta corretta */
+            }
+            
             break;
         }
         

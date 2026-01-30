@@ -6,14 +6,8 @@
 #include "stations.h"
 #include "util.h"
 
-/* ---------------------------------------------------------
-   Inizializzazione delle stazioni
-   --------------------------------------------------------- */
 void stations_init(shm_t *shm) {
-
     printf("[STATIONS] Inizializzazione stazioni...\n");
-
-    /* PRIMI */
     shm->st_primi.postazioni_totali   = 0;
     shm->st_primi.postazioni_occupate = 0;
     memset(shm->st_primi.porzioni, 0, sizeof(shm->st_primi.porzioni));
@@ -21,7 +15,6 @@ void stations_init(shm_t *shm) {
     shm->st_primi.utenti_serviti = 0;
     shm->st_primi.utenti_in_coda = 0;
 
-    /* SECONDI */
     shm->st_secondi.postazioni_totali   = 0;
     shm->st_secondi.postazioni_occupate = 0;
     memset(shm->st_secondi.porzioni, 0, sizeof(shm->st_secondi.porzioni));
@@ -29,7 +22,6 @@ void stations_init(shm_t *shm) {
     shm->st_secondi.utenti_serviti = 0;
     shm->st_secondi.utenti_in_coda = 0;
 
-    /* COFFEE (porzioni infinite) */
     shm->st_coffee.postazioni_totali   = 0;
     shm->st_coffee.postazioni_occupate = 0;
     for (int i = 0; i < MAX_COFFEE_TYPES; i++)
@@ -38,7 +30,6 @@ void stations_init(shm_t *shm) {
     shm->st_coffee.utenti_serviti = 0;
     shm->st_coffee.utenti_in_coda = 0;
 
-    /* CASSA */
     shm->st_cassa.postazioni_totali   = 0;
     shm->st_cassa.postazioni_occupate = 0;
     for (int i = 0; i < MAX_PRIMI_TYPES; i++)
@@ -47,20 +38,14 @@ void stations_init(shm_t *shm) {
     shm->st_cassa.utenti_serviti = 0;
     shm->st_cassa.utenti_in_coda = 0;
 
-    /* Tavoli */
     shm->tavoli_liberi = shm->NOFTABLESEATS;
 }
 
-/* ---------------------------------------------------------
-   Refill iniziale del giorno
-   --------------------------------------------------------- */
 void stations_refill_day(shm_t *shm) {
     printf("[STATIONS] Refill iniziale del giorno...\n");
-    /* PRIMI */
     for (int i = 0; i < shm->menu_primi_count; i++)
         shm->st_primi.porzioni[i] = shm->AVGREFILLPRIMI;
 
-    /* SECONDI */
     for (int i = 0; i < shm->menu_secondi_count; i++)
         shm->st_secondi.porzioni[i] = shm->AVGREFILLSECONDI;
 }
@@ -71,20 +56,15 @@ void stations_refill_day(shm_t *shm) {
    Incrementa di 1 porzione fino a MAX_PORZIONI per ogni tipo di piatto
    --------------------------------------------------------- */
 void stations_refill_periodic(shm_t *shm) {
-
-    /* PRIMI: incrementa di 1 fino al massimo */
     for (int i = 0; i < shm->menu_primi_count; i++) {
         if (shm->st_primi.porzioni[i] < shm->MAXPORZIONIPRIMI)
             shm->st_primi.porzioni[i]++;
     }
 
-    /* SECONDI: incrementa di 1 fino al massimo */
     for (int i = 0; i < shm->menu_secondi_count; i++) {
         if (shm->st_secondi.porzioni[i] < shm->MAXPORZIONISECONDI)
             shm->st_secondi.porzioni[i]++;
     }
-
-    /* COFFEE e CASSA: porzioni illimitate (già inizializzate a -1) */
 }
 
 /* ---------------------------------------------------------
@@ -94,20 +74,17 @@ void stations_refill_periodic(shm_t *shm) {
    - operatori extra assegnati in base ai tempi medi (più lento → più operatori)
    --------------------------------------------------------- */
 void stations_assign_workers(shm_t *shm) {
-
     printf("[STATIONS] Assegnazione operatori alle stazioni...\n");
 
     const int NUM_STATIONS = 4;
     int operatori_disponibili = shm->NOFWORKERS;
 
-    /* Verifica che ci siano abbastanza operatori (almeno 1 per stazione) */
     if (operatori_disponibili < NUM_STATIONS) {
         printf("[STATIONS] ERRORE: Servono almeno %d operatori (1 per stazione), disponibili: %d\n",
                NUM_STATIONS, operatori_disponibili);
         exit(EXIT_FAILURE);
     }
 
-    /* Passo 1: Assegna almeno 1 operatore per stazione */
     shm->st_primi.postazioni_totali = 1;
     shm->st_secondi.postazioni_totali = 1;
     shm->st_coffee.postazioni_totali = 1;
@@ -120,7 +97,6 @@ void stations_assign_workers(shm_t *shm) {
     printf("  COFFEE:  %d ns\n", shm->AVGSRVCCOFFEE);
     printf("  CASSA:   %d ns\n", shm->AVGSRVCCASSA);
 
-    /* Passo 2: Calcola la somma totale dei tempi medi */
     int tempo_totale = shm->AVGSRVCPRIMI + shm->AVGSRVCMAINCOURSE + 
                        shm->AVGSRVCCOFFEE + shm->AVGSRVCCASSA;
 
@@ -129,9 +105,8 @@ void stations_assign_workers(shm_t *shm) {
         tempo_totale = 1;
     }
 
-    /* Passo 3: Distribuisci gli operatori rimanenti in modo proporzionale ai tempi medi */
+    /* Distribuisce gli operatori rimanenti in modo proporzionale ai tempi medi */
     if (operatori_disponibili > 0) {
-        /* Calcola operatori aggiuntivi per ciascuna stazione */
         double ratio_primi = (double)shm->AVGSRVCPRIMI / tempo_totale;
         double ratio_secondi = (double)shm->AVGSRVCMAINCOURSE / tempo_totale;
         double ratio_coffee = (double)shm->AVGSRVCCOFFEE / tempo_totale;
@@ -148,7 +123,7 @@ void stations_assign_workers(shm_t *shm) {
         shm->st_coffee.postazioni_totali += extra_coffee;
         shm->st_cassa.postazioni_totali += extra_cassa;
 
-        /* Gestisci eventuali operatori rimanenti per arrotondamento */
+        /* Gestisce eventuali operatori rimanenti per arrotondamento */
         int assegnati = extra_primi + extra_secondi + extra_coffee + extra_cassa;
         int rimanenti = operatori_disponibili - assegnati;
 
@@ -173,7 +148,6 @@ void stations_assign_workers(shm_t *shm) {
         }
     }
 
-    /* Verifica finale */
     int total_assigned = shm->st_primi.postazioni_totali + 
                          shm->st_secondi.postazioni_totali +
                          shm->st_coffee.postazioni_totali + 
@@ -191,19 +165,12 @@ void stations_assign_workers(shm_t *shm) {
     printf("  TOTALE:  %d postazioni\n", total_assigned);
 }
 
-/* ---------------------------------------------------------
-   Calcolo piatti avanzati a fine giornata
-   --------------------------------------------------------- */
 void stations_compute_leftovers(shm_t *shm) {
-
     shm->stats_giorno.piatti_primi_avanzati = 0;
     shm->stats_giorno.piatti_secondi_avanzati = 0;
-
-    /* PRIMI */
     for (int i = 0; i < shm->menu_primi_count; i++)
         shm->stats_giorno.piatti_primi_avanzati += shm->st_primi.porzioni[i];
 
-    /* SECONDI */
     for (int i = 0; i < shm->menu_secondi_count; i++)
         shm->stats_giorno.piatti_secondi_avanzati += shm->st_secondi.porzioni[i];
 }
