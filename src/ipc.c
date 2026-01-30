@@ -66,10 +66,6 @@ static void init_station_semaphore(station_t *st) {
 }
 
 void ipc_create_semaphores(void) {
-    if (sem_init(&shm->sem_tavoli, 1, shm->NOFTABLESEATS) < 0) {
-        perror("[IPC] sem_init tavoli");
-        exit(EXIT_FAILURE);
-    }
 
     if (sem_init(&shm->sem_barrier, 1, 0) < 0) {
         perror("[IPC] sem_init barrier");
@@ -94,10 +90,19 @@ void ipc_create_semaphores(void) {
     init_station_semaphore(&shm->st_cassa);
 }
 
+void ipc_init_table_semaphore(void) {
+    printf("[IPC] Inizializzazione semaforo tavoli con %d posti\n", shm->NOFTABLESEATS);
+    if (sem_init(&shm->sem_tavoli, 1, shm->NOFTABLESEATS) < 0) {
+        perror("[IPC] sem_init tavoli");
+        exit(EXIT_FAILURE);
+    }
+}
+
 void ipc_destroy_semaphores(void) {
     sem_destroy(&shm->sem_tavoli);
     sem_destroy(&shm->sem_barrier);
     sem_destroy(&shm->sem_day_start);
+    sem_destroy(&shm->sem_stats);
 
     sem_destroy(&shm->st_primi.mutex);
     sem_destroy(&shm->st_secondi.mutex);

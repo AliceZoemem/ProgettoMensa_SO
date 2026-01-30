@@ -26,6 +26,7 @@ static int got_coffee  = 0;
 
 static void user_init();
 static void user_loop(void);
+static int  end_day_while_waiting(void);
 static int  go_to_station(int station_type, int piatto);
 static int  try_all_dishes_of_type(int station_type, int max_types);
 static int  go_to_cassa(void);
@@ -57,12 +58,9 @@ static void user_init() {
 
 static void user_loop(void) {
     while (1) {
-        printf("[UTENTE %d] In attesa di inizio giornata (simulation_running=%d)\n", 
-               user_id, shm->simulation_running);
         sem_wait(&shm->sem_day_start);
         
-        printf("[UTENTE %d] Giornata iniziata (simulation_running=%d)\n", 
-               user_id, shm->simulation_running);
+        printf("[UTENTE %d] Giornata iniziata\n", user_id);
 
         if (!shm->simulation_running) {
             printf("[UTENTE %d] Simulazione terminata, esco\n", user_id);
@@ -107,6 +105,11 @@ static void user_loop(void) {
             sem_wait(&shm->sem_stats);
             shm->stats_giorno.utenti_non_serviti++;
             sem_post(&shm->sem_stats);
+            
+            __sync_fetch_and_add(&shm->day_barrier_count, 1);
+            while (shm->day_barrier_count < shm->NOFUSERS && shm->simulation_running) {
+                nanosleep(&(struct timespec){0, 10000000}, NULL);
+            }
             continue;
         }
 
@@ -123,6 +126,11 @@ static void user_loop(void) {
             sem_wait(&shm->sem_stats);
             shm->stats_giorno.utenti_non_serviti++;
             sem_post(&shm->sem_stats);
+
+            __sync_fetch_and_add(&shm->day_barrier_count, 1);
+            while (shm->day_barrier_count < shm->NOFUSERS && shm->simulation_running) {
+                nanosleep(&(struct timespec){0, 10000000}, NULL);
+            }
             continue;
         }
 
@@ -130,7 +138,12 @@ static void user_loop(void) {
 
         go_to_tavolo_and_eat();
 
+        __sync_fetch_and_add(&shm->day_barrier_count, 1);
         printf("[UTENTE %d] Ha finito e lascia la mensa per oggi\n", user_id);
+        
+        while (shm->day_barrier_count < shm->NOFUSERS && shm->simulation_running) {
+            nanosleep(&(struct timespec){0, 10000000}, NULL);
+        }
     }
 }
 
@@ -140,6 +153,13 @@ static int end_day_while_waiting() {
         sem_wait(&shm->sem_stats);
         shm->stats_giorno.utenti_non_serviti++;
         sem_post(&shm->sem_stats);
+        
+        __sync_fetch_and_add(&shm->day_barrier_count, 1);
+        printf("[UTENTE %d] Attendo fine giornata... (%d/%d)\n", 
+               user_id, shm->day_barrier_count, shm->NOFUSERS);
+        while (shm->day_barrier_count < shm->NOFUSERS && shm->simulation_running) {
+            nanosleep(&(struct timespec){0, 10000000}, NULL);
+        }
         return 1;
     }
     return 0;
@@ -321,22 +341,68 @@ static int go_to_cassa(void) {
 
 static void go_to_tavolo_and_eat(void) {
     printf("[UTENTE %d] Cerca un tavolo libero...\n", user_id);
-    sem_wait(&shm->sem_tavoli);
-    shm->tavoli_liberi--;
+    
+    while (1) {
+        if (!shm->simulation_running) {
+            printf("[UTENTE %d] Giornata terminata mentre cercavo tavolo, non servito\n", user_id);
+            sem_wait(&shm->sem_stats);
+            shm->stats_giorno.utenti_non_serviti++;
+            sem_post(&shm->sem_stats);
+            return;
+        }
+        
+        /* Prova ad acquisire un posto con timeout */
+        struct timespec timeout;
+        clock_gettime(CLOCK_REALTIME, &timeout);
+        timeout.tv_nsec += 100000000; // 100ms
+        if (timeout.tv_nsec >= 1000000000) {
+            timeout.tv_sec++;
+            timeout.tv_nsec -= 1000000000;
+        }
+        
+        if (sem_timedwait(&shm->sem_tavoli, &timeout) == 0) {
+            /* Tavolo acquisito - il semaforo decrementa automaticamente */
+            /* Aggiorna contatore per statistiche */
+            __sync_fetch_and_sub(&shm->tavoli_liberi, 1);
+            break;
+        }
+        
+        /* Timeout scaduto, controlla se la simulazione è ancora attiva */
+        if (errno != ETIMEDOUT) {
+            perror("[UTENTE] sem_timedwait tavoli");
+            return;
+        }
+    }
+    
+    printf("[UTENTE %d] Posto a tavola acquisito (tavoli liberi ora: %d/%d)\n", 
+           user_id, shm->tavoli_liberi, shm->NOFTABLESEATS);
 
     printf("[UTENTE %d] Si è seduto a mangiare (Primo:%d Secondo:%d Coffee:%d)\n", 
            user_id, got_primo, got_secondo, got_coffee);
+    
     int piatti = got_primo + got_secondo + got_coffee;
     int eat_ms = piatti * 1500; // 1.5 secondi per piatto
 
-    struct timespec t;
-    t.tv_sec  = eat_ms / 1000;
-    t.tv_nsec = (eat_ms % 1000) * 1000000L;
-    nanosleep(&t, NULL);
+    /* Mangia con controllo interruzione */
+    struct timespec eat_time;
+    eat_time.tv_sec  = eat_ms / 1000;
+    eat_time.tv_nsec = (eat_ms % 1000) * 1000000L;
+    
+    struct timespec remaining = eat_time;
+    while (nanosleep(&remaining, &remaining) != 0) {
+        if (!shm->simulation_running) {
+            printf("[UTENTE %d] Giornata terminata mentre mangiavo\n", user_id);
+            break;
+        }
+    }
 
     printf("[UTENTE %d] Ha finito di mangiare, lascia il tavolo\n", user_id);
-    shm->tavoli_liberi++;
+    
+    __sync_fetch_and_add(&shm->tavoli_liberi, 1);
     sem_post(&shm->sem_tavoli);
+    
+    printf("[UTENTE %d] Tavolo liberato (tavoli liberi ora: %d/%d)\n", 
+           user_id, shm->tavoli_liberi, shm->NOFTABLESEATS);
 }
 
 static int get_msg_queue(int station_type) {

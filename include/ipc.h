@@ -9,6 +9,7 @@ shm_t *ipc_attach_shared_memory(void);
 void ipc_destroy_shared_memory(void);
 
 void ipc_create_semaphores(void);
+void ipc_init_table_semaphore(void);
 void ipc_destroy_semaphores(void);
 
 void ipc_create_message_queues(void);

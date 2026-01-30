@@ -51,6 +51,9 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
 
+    /* Inizializza semaforo tavoli dopo aver caricato la configurazione */
+    ipc_init_table_semaphore();
+
     create_stations();
 
     spawn_workers();
@@ -208,7 +211,7 @@ void start_new_day(int day) {
     }
 
     shm->stats_giorno.operatori_attivi = shm->NOFWORKERS;
-
+    shm->day_barrier_count = 0;  
     shm->simulation_running = 1;
     int total = shm->NOFWORKERS + shm->NOFUSERS;
     for (int i = 0; i < total; i++) {
@@ -218,7 +221,16 @@ void start_new_day(int day) {
 
 void end_day(int day) {
     printf("[MENSA] Fine giorno %d\n", day);
+    shm->simulation_running = 0;
     
+    /* Attende con timeout per evitare deadlock */
+    int wait_cycles = 0;
+    while (shm->day_barrier_count < shm->NOFUSERS && wait_cycles < 100) {
+        nanosleep(&(struct timespec){0, 50000000}, NULL);
+        wait_cycles++;
+    }
+    
+    printf("[MENSA] Tutti gli utenti hanno completato il giorno\n");
     nanosleep(&(struct timespec){0, 100000000}, NULL);
     
     int utenti_in_attesa = shm->st_primi.utenti_in_coda + 

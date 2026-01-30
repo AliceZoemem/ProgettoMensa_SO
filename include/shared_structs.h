@@ -125,6 +125,7 @@ typedef struct {
 
     int giorno_corrente;
     int terminazione_causa; // 0=timeout, 1=overload
+    int day_barrier_count;  // Contatore per sincronizzare fine giornata
 
     /* Barriera di avvio */
     int ready_count;
