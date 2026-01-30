@@ -387,6 +387,8 @@ void update_stats_on_service(msg_request_t *req, msg_response_t *res) {
         (res->t_servizio.tv_sec - req->t_arrivo.tv_sec) * 1000000000L +
         (res->t_servizio.tv_nsec - req->t_arrivo.tv_nsec);
 
+    sem_wait(&shm->sem_stats);  // Mutua esclusione per aggiornamento statistiche
+
     switch (station_type) {
         case 0:
             day->tempo_attesa_primi_ns += wait_ns;
@@ -433,4 +435,6 @@ void update_stats_on_service(msg_request_t *req, msg_response_t *res) {
             
             break;
     }
+
+    sem_post(&shm->sem_stats);
 }

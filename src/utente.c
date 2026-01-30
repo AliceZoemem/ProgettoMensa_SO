@@ -120,7 +120,9 @@ static void user_loop(void) {
         /* Controlla se il giorno è finito mentre era in coda */
         if (!shm->simulation_running) {
             printf("[UTENTE %d] Giornata terminata mentre ero in coda, abbandono\n", user_id);
+            sem_wait(&shm->sem_stats);
             shm->stats_giorno.utenti_non_serviti++;
+            sem_post(&shm->sem_stats);
             continue;
         }
 
@@ -137,14 +139,18 @@ static void user_loop(void) {
         /* Controlla se il giorno è finito mentre era in coda */
         if (!shm->simulation_running) {
             printf("[UTENTE %d] Giornata terminata mentre ero in coda, abbandono\n", user_id);
+            sem_wait(&shm->sem_stats);
             shm->stats_giorno.utenti_non_serviti++;
+            sem_post(&shm->sem_stats);
             continue;
         }
 
         /* Se non ha ottenuto nulla → abbandona il giorno, ma resta per i successivi */
         if (!want_primo && !want_secondo) {
             printf("[UTENTE %d] Nessun piatto disponibile (primi e secondi esauriti), abbandono il giorno\n", user_id);
+            sem_wait(&shm->sem_stats);
             shm->stats_giorno.utenti_non_serviti++;
+            sem_post(&shm->sem_stats);
             continue;
         }
 
@@ -158,21 +164,27 @@ static void user_loop(void) {
         /* Controlla se il giorno è finito mentre era in coda */
         if (!shm->simulation_running) {
             printf("[UTENTE %d] Giornata terminata mentre ero in coda, abbandono\n", user_id);
+            sem_wait(&shm->sem_stats);
             shm->stats_giorno.utenti_non_serviti++;
+            sem_post(&shm->sem_stats);
             continue;
         }
 
         /* 4. CASSA */
         if (!go_to_cassa()) {
             printf("[UTENTE %d] Impossibile pagare, abbandono il giorno\n", user_id);
+            sem_wait(&shm->sem_stats);
             shm->stats_giorno.utenti_non_serviti++;
+            sem_post(&shm->sem_stats);
             continue;
         }
 
         /* Controlla se il giorno è finito */
         if (!shm->simulation_running) {
             printf("[UTENTE %d] Giornata terminata, abbandono\n", user_id);
+            sem_wait(&shm->sem_stats);
             shm->stats_giorno.utenti_non_serviti++;
+            sem_post(&shm->sem_stats);
             continue;
         }
 
@@ -342,6 +354,8 @@ static int go_to_cassa(void) {
         
         if (received >= 0) {
             /* Messaggio ricevuto */
+            printf("[UTENTE %d] Ricevuto risposta dalla cassa: esito=%d, received=%zd bytes\n",
+                   user_id, res.esito, received);
             break;
         }
         
@@ -355,8 +369,14 @@ static int go_to_cassa(void) {
         nanosleep(&(struct timespec){0, 50000000}, NULL); // 50ms
     }
 
-    printf("[UTENTE %d] Ha pagato alla cassa\n", user_id);
-    return 1;
+    /* Verifica esito */
+    if (res.esito == 0) {
+        printf("[UTENTE %d] Ha pagato alla cassa\n", user_id);
+        return 1;
+    }
+    
+    printf("[UTENTE %d] Errore al pagamento alla cassa (esito=%d)\n", user_id, res.esito);
+    return 0;
 }
 
 /* ---------------------------------------------------------

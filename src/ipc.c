@@ -94,6 +94,12 @@ void ipc_create_semaphores(void) {
         exit(EXIT_FAILURE);
     }
 
+    /* Semaforo per statistiche */
+    if (sem_init(&shm->sem_stats, 1, 1) < 0) {
+        perror("[IPC] sem_init stats");
+        exit(EXIT_FAILURE);
+    }
+
     /* Semaforo inizio giornata */
     if (sem_init(&shm->sem_day_start, 1, 0) < 0) {
         perror("[IPC] sem_init day_start");

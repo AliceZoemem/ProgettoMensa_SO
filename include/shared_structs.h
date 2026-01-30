@@ -142,6 +142,7 @@ typedef struct {
     /* Statistiche */
     stats_t stats_tot;
     stats_t stats_giorno;
+    sem_t sem_stats;            // mutex per accesso alle statistiche
 
     /* Stato simulazione */
     int giorno_corrente;
