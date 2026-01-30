@@ -34,16 +34,25 @@ void cleanup_and_exit(int code);
 /* ---------------------------------------------------------
    MAIN
    --------------------------------------------------------- */
-int main() {
+int main(int argc, char *argv[]) {
     printf("[MENSA] Avvio del processo responsabile...\n");
 
     /* 2. Inizializza IPC */
     init_ipc();
 
     /* 1. Carica configurazione */
-    if (load_config() < 0) {
-        fprintf(stderr, "[MENSA] Errore caricamento configurazione\n");
-        exit(EXIT_FAILURE);
+    /* Se specificato, usa il file di configurazione custom */
+    if (argc > 1) {
+        printf("[MENSA] Usando file di configurazione: %s\n", argv[1]);
+        if (load_config_from_file(argv[1]) < 0) {
+            fprintf(stderr, "[MENSA] Errore caricamento configurazione\n");
+            exit(EXIT_FAILURE);
+        }
+    } else {
+        if (load_config() < 0) {
+            fprintf(stderr, "[MENSA] Errore caricamento configurazione\n");
+            exit(EXIT_FAILURE);
+        }
     }
 
     /* 1b. Carica menu */
@@ -175,23 +184,40 @@ void simulate_days(void) {
         /* Simulazione del giorno:
            1 minuto = NNANOSECS nanosecondi
            un giorno = 240 minuti -> 4h di lavoro
+           Refill periodico ogni 10 minuti
         */
-        long day_ns = shm->NNANOSECS * 60 * 240;
+        long total_minutes = 240;  // 4 ore = 240 minuti
+        long refill_interval = 10; // refill ogni 10 minuti
+        long minute_ns = shm->NNANOSECS * 60;
+        long refill_interval_ns = minute_ns * refill_interval;
 
-        nanosleep(&(struct timespec){
-            .tv_sec = day_ns / 1000000000,
-            .tv_nsec = day_ns % 1000000000
-        }, NULL);
+        for (long elapsed_minutes = 0; elapsed_minutes < total_minutes; elapsed_minutes += refill_interval) {
+            /* Attendi 10 minuti simulati */
+            nanosleep(&(struct timespec){
+                .tv_sec = refill_interval_ns / 1000000000,
+                .tv_nsec = refill_interval_ns % 1000000000
+            }, NULL);
+
+            /* Refill periodico se il giorno è ancora attivo */
+            if (shm->simulation_running) {
+                stations_refill_periodic(shm);
+            }
+        }
 
         end_day(day);
 
-        /* Controllo overload */
+        /* Controllo overload: troppi utenti in attesa */
         if (shm->stats_giorno.utenti_in_attesa > shm->OVERLOADTHRESHOLD) {
-            terminate_simulation(1);
+            printf("\n[MENSA] OVERLOAD RILEVATO!\n");
+            printf("[MENSA] Utenti in attesa: %d, Soglia: %d\n", 
+                   shm->stats_giorno.utenti_in_attesa, shm->OVERLOADTHRESHOLD);
+            terminate_simulation(1);  // 1 = OVERLOAD
+            return;
         }
     }
 
-    terminate_simulation(0);
+    /* Completamento normale: timeout raggiunto */
+    terminate_simulation(0);  // 0 = TIMEOUT
 }
 
 void start_new_day(int day) {
@@ -205,6 +231,9 @@ void start_new_day(int day) {
         stations_refill_day(shm);
     }
 
+    /* Imposta operatori attivi per questo giorno */
+    shm->stats_giorno.operatori_attivi = shm->NOFWORKERS;
+
     /* Attiva simulazione e sblocca operatori/utenti */
     shm->simulation_running = 1;
     int total = shm->NOFWORKERS + shm->NOFUSERS;
@@ -215,10 +244,25 @@ void start_new_day(int day) {
 
 void end_day(int day) {
     printf("[MENSA] Fine giorno %d\n", day);
+    
+    /* Calcola gli utenti ancora in attesa nelle varie code */
+    int utenti_in_attesa = shm->st_primi.utenti_in_coda + 
+                           shm->st_secondi.utenti_in_coda + 
+                           shm->st_coffee.utenti_in_coda + 
+                           shm->st_cassa.utenti_in_coda;
+    
+    shm->stats_giorno.utenti_in_attesa = utenti_in_attesa;
+    
+    if (utenti_in_attesa > 0) {
+        printf("[MENSA] ATTENZIONE: %d utenti ancora in attesa a fine giornata\n", 
+               utenti_in_attesa);
+    }
+    
+    /* Calcola i piatti avanzati */
+    stations_compute_leftovers(shm);
+    
     stats_print_day(&shm->stats_giorno, day);
-
     stats_update_totals(&shm->stats_tot, &shm->stats_giorno);
-    shm->simulation_running = 0;
 }
 
 void terminate_simulation(int cause) {
@@ -226,10 +270,24 @@ void terminate_simulation(int cause) {
     shm->terminazione_causa = cause;
     shm->simulation_running = 0;
 
-    printf("\n[MENSA] Terminazione simulazione: %s\n",
-           cause == 0 ? "COMPLETATA" : "OVERLOAD");
+    printf("\n========================================================\n");
+    printf("          TERMINAZIONE SIMULAZIONE\n");
+    printf("========================================================\n");
+    
+    if (cause == 0) {
+        printf("CAUSA: TIMEOUT - Durata simulazione completata\n");
+        printf("Giorni simulati: %d/%d\n", shm->giorno_corrente, shm->SIMDURATION);
+    } else {
+        printf("CAUSA: OVERLOAD - Troppi utenti in attesa\n");
+        printf("Utenti in attesa: %d (soglia: %d)\n", 
+               shm->stats_giorno.utenti_in_attesa, shm->OVERLOADTHRESHOLD);
+        printf("Giorno di interruzione: %d/%d\n", 
+               shm->giorno_corrente, shm->SIMDURATION);
+    }
+    
+    printf("========================================================\n\n");
 
-    stats_print_final(&shm->stats_tot);
+    stats_print_final(&shm->stats_tot, shm->giorno_corrente);
 
     /* Sblocca eventuali processi in attesa */
     int total = shm->NOFWORKERS + shm->NOFUSERS;

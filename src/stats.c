@@ -49,6 +49,7 @@ void stats_print_day(stats_t *s, int day) {
 
     printf("Utenti serviti:            %d\n", s->utenti_serviti);
     printf("Utenti non serviti:        %d\n", s->utenti_non_serviti);
+    printf("Utenti in attesa (fine giornata): %d\n", s->utenti_in_attesa);
 
     printf("\nPiatti serviti:\n");
     printf("  Primi:                   %d\n", s->piatti_primi_serviti);
@@ -82,38 +83,86 @@ void stats_print_day(stats_t *s, int day) {
 /* ---------------------------------------------------------
    Stampa statistiche finali
    --------------------------------------------------------- */
-void stats_print_final(stats_t *tot) {
+void stats_print_final(stats_t *tot, int giorni) {
 
     printf("\n================== STATISTICHE FINALI ==================\n");
 
+    /* Utenti */
+    printf("\nUTENTI:\n");
     printf("Utenti serviti totali:     %d\n", tot->utenti_serviti);
     printf("Utenti non serviti totali: %d\n", tot->utenti_non_serviti);
+    if (giorni > 0) {
+        printf("Utenti serviti in media al giorno:     %.2f\n", 
+               (double)tot->utenti_serviti / giorni);
+        printf("Utenti non serviti in media al giorno: %.2f\n", 
+               (double)tot->utenti_non_serviti / giorni);
+    }
 
-    printf("\nPiatti serviti totali:\n");
-    printf("  Primi:                   %d\n", tot->piatti_primi_serviti);
-    printf("  Secondi:                 %d\n", tot->piatti_secondi_serviti);
-    printf("  Coffee/Dolci:            %d\n", tot->piatti_coffee_serviti);
+    /* Piatti serviti */
+    printf("\nPIATTI DISTRIBUITI:\n");
+    int tot_piatti_serviti = tot->piatti_primi_serviti + 
+                             tot->piatti_secondi_serviti + 
+                             tot->piatti_coffee_serviti;
+    printf("Totali:                  %d\n", tot_piatti_serviti);
+    printf("  Primi:                 %d\n", tot->piatti_primi_serviti);
+    printf("  Secondi:               %d\n", tot->piatti_secondi_serviti);
+    printf("  Coffee/Dolci:          %d\n", tot->piatti_coffee_serviti);
+    if (giorni > 0) {
+        printf("\nPiatti distribuiti in media al giorno:\n");
+        printf("Totali:                  %.2f\n", (double)tot_piatti_serviti / giorni);
+        printf("  Primi:                 %.2f\n", (double)tot->piatti_primi_serviti / giorni);
+        printf("  Secondi:               %.2f\n", (double)tot->piatti_secondi_serviti / giorni);
+        printf("  Coffee/Dolci:          %.2f\n", (double)tot->piatti_coffee_serviti / giorni);
+    }
 
-    printf("\nPiatti avanzati totali:\n");
-    printf("  Primi:                   %d\n", tot->piatti_primi_avanzati);
-    printf("  Secondi:                 %d\n", tot->piatti_secondi_avanzati);
+    /* Piatti avanzati */
+    printf("\nPIATTI AVANZATI:\n");
+    int tot_piatti_avanzati = tot->piatti_primi_avanzati + 
+                              tot->piatti_secondi_avanzati;
+    printf("Totali:                  %d\n", tot_piatti_avanzati);
+    printf("  Primi:                 %d\n", tot->piatti_primi_avanzati);
+    printf("  Secondi:               %d\n", tot->piatti_secondi_avanzati);
+    if (giorni > 0) {
+        printf("\nPiatti avanzati in media al giorno:\n");
+        printf("Totali:                  %.2f\n", (double)tot_piatti_avanzati / giorni);
+        printf("  Primi:                 %.2f\n", (double)tot->piatti_primi_avanzati / giorni);
+        printf("  Secondi:               %.2f\n", (double)tot->piatti_secondi_avanzati / giorni);
+    }
 
-    printf("\nTempi medi di attesa globali (ms):\n");
+    /* Tempi di attesa */
+    printf("\nTEMPI MEDI DI ATTESA:\n");
+    
+    if (tot->utenti_serviti > 0) {
+        long avg_primi   = tot->tempo_attesa_primi_ns   / 1000000 / tot->utenti_serviti;
+        long avg_secondi = tot->tempo_attesa_secondi_ns / 1000000 / tot->utenti_serviti;
+        long avg_coffee  = tot->tempo_attesa_coffee_ns  / 1000000 / tot->utenti_serviti;
+        long avg_cassa   = tot->tempo_attesa_cassa_ns   / 1000000 / tot->utenti_serviti;
+        
+        long avg_complessivo = (avg_primi + avg_secondi + avg_coffee + avg_cassa) / 4;
+        
+        printf("Tempo medio complessivo:     %ld ms\n", avg_complessivo);
+        printf("  Stazione primi:            %ld ms\n", avg_primi);
+        printf("  Stazione secondi:          %ld ms\n", avg_secondi);
+        printf("  Stazione coffee:           %ld ms\n", avg_coffee);
+        printf("  Cassa:                     %ld ms\n", avg_cassa);
+    } else {
+        printf("Nessun utente servito\n");
+    }
 
-    long avg_primi   = tot->utenti_serviti ? tot->tempo_attesa_primi_ns   / 1000000 / tot->utenti_serviti : 0;
-    long avg_secondi = tot->utenti_serviti ? tot->tempo_attesa_secondi_ns / 1000000 / tot->utenti_serviti : 0;
-    long avg_coffee  = tot->utenti_serviti ? tot->tempo_attesa_coffee_ns  / 1000000 / tot->utenti_serviti : 0;
-    long avg_cassa   = tot->utenti_serviti ? tot->tempo_attesa_cassa_ns   / 1000000 / tot->utenti_serviti : 0;
+    /* Operatori e pause */
+    printf("\nOPERATORI:\n");
+    printf("Operatori attivi totali:     %d\n", tot->operatori_attivi);
+    printf("Pause totali:                %d\n", tot->pause_totali);
+    if (giorni > 0) {
+        printf("Pause medie per giornata:    %.2f\n", (double)tot->pause_totali / giorni);
+    }
 
-    printf("  Stazione primi:          %ld ms\n", avg_primi);
-    printf("  Stazione secondi:        %ld ms\n", avg_secondi);
-    printf("  Stazione coffee:         %ld ms\n", avg_coffee);
-    printf("  Cassa:                   %ld ms\n", avg_cassa);
-
-    printf("\nOperatori attivi totali:   %d\n", tot->operatori_attivi);
-    printf("Pause totali:              %d\n", tot->pause_totali);
-
-    printf("\nRicavo totale:             %.2f €\n", tot->ricavo_giornaliero);
+    /* Ricavi */
+    printf("\nRICAVI:\n");
+    printf("Ricavo totale:               %.2f €\n", tot->ricavo_giornaliero);
+    if (giorni > 0) {
+        printf("Ricavo medio per giornata:   %.2f €\n", tot->ricavo_giornaliero / giorni);
+    }
 
     printf("=========================================================\n\n");
 }

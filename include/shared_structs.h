@@ -15,21 +15,28 @@
    Messaggi per le code di messaggi
    --------------------------------------------------------- */
 typedef struct {
-    long mtype;               // tipo messaggio (stazione)
-    int user_id;              // id utente
-    int richiesta_tipo;       // 0=primo, 1=secondo, 2=coffee, 3=cassa
-    int piatto_scelto;        // indice piatto richiesto
-    struct timespec t_arrivo; // timestamp arrivo in coda
+    long mtype;              // tipo messaggio (stazione o utente)
+    int user_id;             // id utente
+    int richiesta_tipo;      // 0=primo, 1=secondo, 2=coffee, 3=cassa
+    int piatto_scelto;       // indice piatto richiesto
+
+    int ha_primo;
+    int ha_secondo;
+    int ha_coffee;
+
+    struct timespec t_arrivo;
 } msg_request_t;
 
 typedef struct {
-    long mtype;               // tipo messaggio (utente)           
+    long mtype;              // tipo messaggio (utente)
     int user_id;
-    int esito;                // 0=ok, 1=piatto terminato, 2=nessun piatto disponibile
-    int piatto_servito;       // indice piatto effettivamente servito
-    struct timespec t_servizio; // timestamp inizio servizio
+    int esito;               // 0=ok, 1=piatto terminato, 2=nessun piatto disponibile
+    int piatto_servito;
+    struct timespec t_servizio;
 } msg_response_t;
 
+#define MSG_REQ_SIZE  (sizeof(msg_request_t)  - sizeof(long))
+#define MSG_RES_SIZE  (sizeof(msg_response_t) - sizeof(long))
 /* ---------------------------------------------------------
    Struttura stazione (primi, secondi, coffee, cassa)
    --------------------------------------------------------- */
@@ -91,6 +98,10 @@ typedef struct {
     int OVERLOADTHRESHOLD;
 
     int NOFTABLESEATS;
+    int NOFWKSEATSPRIMI;
+    int NOFWKSEATSSECONDI;
+    int NOFWKSEATSCOFFEE;
+    int NOFWKSEATSCASSA;
 
     int AVGREFILLPRIMI;
     int AVGREFILLSECONDI;

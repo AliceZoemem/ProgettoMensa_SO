@@ -12,17 +12,49 @@ extern shm_t *shm;
    Lettura file config.txt
    --------------------------------------------------------- */
 int load_config(void) {
+    return load_config_from_file("config.txt");
+}
 
-    FILE *f = fopen("config.txt", "r");
+int load_config_from_file(const char *filename) {
+
+    FILE *f = fopen(filename, "r");
     if (!f) {
-        perror("[CONFIG] Impossibile aprire config.txt");
+        fprintf(stderr, "[CONFIG] Impossibile aprire %s\n", filename);
+        perror("[CONFIG]");
         return -1;
     }
+    
+    printf("[CONFIG] Caricamento configurazione da %s\n", filename);
 
+    char line[256];
     char key[64];
-    long value;
 
-    while (fscanf(f, "%63s %ld", key, &value) == 2) {
+    while (fgets(line, sizeof(line), f)) {
+        /* Ignora commenti e righe vuote */
+        if (line[0] == '#' || line[0] == '\n') {
+            continue;
+        }
+        
+        /* Prova a leggere come double (per i prezzi) */
+        double dvalue;
+        if (sscanf(line, "%63s %lf", key, &dvalue) == 2) {
+            
+            /* Parametri in formato double */
+            if (strcmp(key, "PRICEPRIMI") == 0) {
+                shm->PRICEPRIMI = dvalue;
+                continue;
+            }
+            else if (strcmp(key, "PRICESECONDI") == 0) {
+                shm->PRICESECONDI = dvalue;
+                continue;
+            }
+            else if (strcmp(key, "PRICECOFFEE") == 0) {
+                shm->PRICECOFFEE = dvalue;
+                continue;
+            }
+            
+            /* Parametri interi */
+            long value = (long)dvalue;
 
         if (strcmp(key, "NOFWORKERS") == 0)
             shm->NOFWORKERS = value;
@@ -41,6 +73,17 @@ int load_config(void) {
 
         else if (strcmp(key, "NOFTABLESEATS") == 0)
             shm->NOFTABLESEATS = value;
+        else if (strcmp(key, "NOFWKSEATSPRIMI") == 0)
+            shm->NOFWKSEATSPRIMI = value;
+        
+        else if (strcmp(key, "NOFWKSEATSSECONDI") == 0)
+            shm->NOFWKSEATSSECONDI = value;
+        
+        else if (strcmp(key, "NOFWKSEATSCOFFEE") == 0)
+            shm->NOFWKSEATSCOFFEE = value;
+        
+        else if (strcmp(key, "NOFWKSEATSCASSA") == 0)
+            shm->NOFWKSEATSCASSA = value;
 
         else if (strcmp(key, "AVGREFILLPRIMI") == 0)
             shm->AVGREFILLPRIMI = value;
@@ -69,17 +112,9 @@ int load_config(void) {
         else if (strcmp(key, "NOFPAUSE") == 0)
             shm->NOFPAUSE = value;
 
-        else if (strcmp(key, "PRICEPRIMI") == 0)
-            shm->PRICEPRIMI = value;
-
-        else if (strcmp(key, "PRICESECONDI") == 0)
-            shm->PRICESECONDI = value;
-
-        else if (strcmp(key, "PRICECOFFEE") == 0)
-            shm->PRICECOFFEE = value;
-
         else {
             printf("[CONFIG] Parametro sconosciuto: %s\n", key);
+        }
         }
     }
 

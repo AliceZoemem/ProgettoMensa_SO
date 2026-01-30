@@ -7,7 +7,7 @@
 #include <string.h>
 #include <errno.h>
 #include <sys/msg.h>
-
+#include <stddef.h>
 #include "shared_structs.h"
 #include "ipc.h"
 #include "util.h"
@@ -27,7 +27,7 @@ void operator_init(int id, int st_type);
 void operator_loop(void);
 int  acquire_station_post(void);
 void release_station_post(void);
-void handle_pause(void);
+int  handle_pause(void);
 void serve_user(void);
 int  get_msg_queue(void);
 long get_service_time_ns(void);
@@ -48,6 +48,10 @@ int main(int argc, char *argv[]) {
 
     /* Attacca shared memory */
     shm = ipc_attach_shared_memory();
+printf("[OPERATORE] sizeof(msg_request_t) = %zu, sizeof(msg_response_t) = %zu\n",
+       sizeof(msg_request_t), sizeof(msg_response_t));
+printf("[OPERATORE] MSG_REQ_SIZE = %zu, MSG_RES_SIZE = %zu\n",
+       (size_t)MSG_REQ_SIZE, (size_t)MSG_RES_SIZE);
 
     /* Segnala che l’operatore è pronto */
     ipc_signal_ready();
@@ -73,29 +77,56 @@ void operator_init(int id, int st_type) {
    Ciclo principale dell’operatore
    --------------------------------------------------------- */
 void operator_loop(void) {
-    /* Attendi inizio giornata */
-    sem_wait(&shm->sem_day_start);
+    while (1) {
+        /* Attende l'inizio di un nuovo giorno */
+        sem_wait(&shm->sem_day_start);
 
-    while (shm->simulation_running) {
+        /* Se la simulazione è terminata, esce */
+        if (!shm->simulation_running) {
+            break;
+        }
 
-        /* 1. Acquisisce una postazione */
-        if (!acquire_station_post())
+        /* Reset stato per il nuovo giorno */
+        pause_count = 0;
+
+        /* All'inizio della giornata, compete per una postazione */
+        printf("[OPERATORE %d] Competizione per postazione alla stazione %d\n", 
+               operator_id, station_type);
+        
+        if (!acquire_station_post()) {
+            /* Non dovrebbe mai succedere con acquire_station_post() bloccante */
             continue;
+        }
+        
+        printf("[OPERATORE %d] Postazione acquisita, inizio turno\n", operator_id);
 
-        /* 2. Serve utenti finché non arriva la fine della giornata */
-        serve_user();
+        /* Lavora finché il giorno è attivo */
+        while (shm->simulation_running) {
+            /* Serve un utente (termina sempre il servizio del cliente corrente) */
+            serve_user();
 
-        /* 3. Gestione pause */
-        if (pause_count < shm->NOFPAUSE)
-            handle_pause();
-
-        /* 4. Rilascia postazione */
+            /* Dopo aver servito il cliente, può decidere di andare in pausa */
+            if (pause_count < shm->NOFPAUSE) {
+                if (handle_pause()) {
+                    /* È andato in pausa, deve riacquisire la postazione */
+                    if (!acquire_station_post()) {
+                        /* Se non riesce, termina il turno */
+                        break;
+                    }
+                    printf("[OPERATORE %d] Rientrato dalla pausa\n", operator_id);
+                }
+            }
+        }
+        
+        /* A fine giornata, rilascia la postazione */
+        printf("[OPERATORE %d] Fine turno giornaliero\n", operator_id);
         release_station_post();
     }
 }
-
 /* ---------------------------------------------------------
    Acquisizione postazione
+   Compete con altri operatori per una postazione libera.
+   Se non trova posto, attende che una postazione si liberi.
    --------------------------------------------------------- */
 int acquire_station_post(void) {
 
@@ -109,14 +140,17 @@ int acquire_station_post(void) {
         default: return 0;
     }
 
+    /* Compete per una postazione */
     while (1) {
+        /* Verifica se la simulazione è ancora attiva */
+        if (!shm->simulation_running) {
+            return 0;
+        }
+
         sem_wait(&st->mutex);
 
+        /* Se c'è una postazione libera, la occupa */
         if (st->postazioni_occupate < st->postazioni_totali) {
-            /* Se è il primo operatore attivo, aggiorna statistiche */
-            if (st->postazioni_occupate == 0)
-                shm->stats_giorno.operatori_attivi++;
-
             st->postazioni_occupate++;
             sem_post(&st->mutex);
             return 1;
@@ -124,8 +158,9 @@ int acquire_station_post(void) {
 
         sem_post(&st->mutex);
 
-        /* Nessuna postazione libera → attesa leggera */
-        nanosleep(&(struct timespec){0, 5000000}, NULL); // 5ms
+        /* Nessuna postazione libera → attende che se ne liberi una */
+        /* L'attesa avviene quando un altro operatore va in pausa */
+        nanosleep(&(struct timespec){0, 10000000}, NULL); // 10ms
     }
 }
 
@@ -151,20 +186,62 @@ void release_station_post(void) {
 
 /* ---------------------------------------------------------
    Gestione pause
+   Criteri per andare in pausa:
+   - Massimo NOF_PAUSE pause al giorno
+   - Probabilità casuale basata sul carico (più utenti = meno pause)
+   - Almeno un operatore deve rimanere attivo sulla stazione
+   Ritorna 1 se è andato in pausa, 0 altrimenti
    --------------------------------------------------------- */
-void handle_pause(void) {
+int handle_pause(void) {
 
-    /* Criterio semplice: pausa casuale con probabilità 1/20 */
-    if (rand_range(1, 20) != 1)
-        return;
+    /* Criterio: probabilità inversamente proporzionale al carico */
+    /* Se ci sono molti utenti in coda, è meno probabile andare in pausa */
+    station_t *st = NULL;
+    switch (station_type) {
+        case 0: st = &shm->st_primi; break;
+        case 1: st = &shm->st_secondi; break;
+        case 2: st = &shm->st_coffee; break;
+        case 3: st = &shm->st_cassa; break;
+        default: return 0;
+    }
 
+    /* Probabilità di pausa: 5% base, ridotta se ci sono utenti in attesa */
+    int pausa_probabilita = 20; // 1/20 = 5%
+    if (st->utenti_in_coda > 5) {
+        pausa_probabilita = 50; // 1/50 = 2% se c'è carico
+    }
+    
+    if (rand_range(1, pausa_probabilita) != 1)
+        return 0;
+
+    /* Verifica che NON sia l'unico operatore sulla stazione */
+    sem_wait(&st->mutex);
+    
+    /* Deve esserci almeno un altro operatore attivo (postazioni_occupate > 1) */
+    if (st->postazioni_occupate <= 1) {
+        sem_post(&st->mutex);
+        /* Non può andare in pausa: è l'unico operatore */
+        return 0;
+    }
+    
+    /* Rilascia la postazione prima di andare in pausa */
+    st->postazioni_occupate--;
+    
+    sem_post(&st->mutex);
+
+    /* Aggiorna contatori */
     pause_count++;
     shm->stats_giorno.pause_totali++;
 
-    printf("[OPERATORE %d] Pausa %d\n", operator_id, pause_count);
+    printf("[OPERATORE %d] Pausa %d/%d (postazioni ora: %d/%d)\n", 
+           operator_id, pause_count, shm->NOFPAUSE,
+           st->postazioni_occupate, st->postazioni_totali);
 
-    /* Durata pausa */
-    nanosleep(&(struct timespec){ .tv_sec = 1, .tv_nsec = 0 }, NULL);
+    /* Durata pausa: tra 2 e 5 secondi */
+    long pausa_sec = rand_range(2, 5);
+    nanosleep(&(struct timespec){ .tv_sec = pausa_sec, .tv_nsec = 0 }, NULL);
+
+    return 1; // È andato in pausa
 }
 
 /* ---------------------------------------------------------
@@ -177,20 +254,29 @@ void serve_user(void) {
     msg_response_t res;
 
     /* Attende un utente con timeout per controllare periodicamente simulation_running */
-    size_t req_size = sizeof(msg_request_t) - sizeof(long);
-    ssize_t received = msgrcv(msgid, &req, req_size, 0, IPC_NOWAIT);
+    memset(&req, 0, sizeof(req));
+    ssize_t received = msgrcv(msgid, &req, MSG_REQ_SIZE, 1, IPC_NOWAIT | MSG_NOERROR);
     
     if (received < 0) {
         if (errno == ENOMSG) {
-            /* Nessun messaggio disponibile, breve pausa */
-            nanosleep(&(struct timespec){0, 10000000}, NULL); // 10ms
+            nanosleep(&(struct timespec){0, 10000000}, NULL); 
             return;
         }
-        /* Altri errori */
         if (!shm->simulation_running) {
             return;
         }
         perror("[OPERATORE] msgrcv");
+        return;
+    }
+    
+    //printf("[OPERATORE %d] Ricevuto messaggio: user_id=%d, tipo=%d, received=%zd bytes\n",
+    //       operator_id, req.user_id, req.richiesta_tipo, received);
+    
+    /* Debug: verifica che il messaggio sia valido */
+    if (req.user_id < 0 || req.user_id >= shm->NOFUSERS || 
+        req.richiesta_tipo < 0 || req.richiesta_tipo > 3) {
+        printf("[OPERATORE %d] ERRORE: Messaggio corrotto! user_id=%d, tipo=%d\n", 
+               operator_id, req.user_id, req.richiesta_tipo);
         return;
     }
 
@@ -204,11 +290,16 @@ void serve_user(void) {
         if (st->porzioni[req.piatto_scelto] <= 0) {
             /* Piatto terminato */
             sem_post(&st->mutex);
-
-            res.mtype = req.user_id;
+            memset(&res, 0, sizeof(res));
+            res.mtype = req.user_id + 1;   // così l'utente filtra per user_id
+            res.user_id = req.user_id;
             res.esito = 1; // piatto terminato
-            size_t res_size = sizeof(msg_response_t) - sizeof(long);
-            msgsnd(msgid, &res, res_size, 0);
+            size_t res_size = MSG_RES_SIZE;
+            if (msgsnd(msgid, &res, res_size, 0) < 0) {
+                fprintf(stderr, "[OPERATORE DEBUG] msgsnd fallita: msgid=%d, res_size=%zu, mtype=%ld, errno=%d\n",
+        msgid, (size_t)MSG_RES_SIZE, res.mtype, errno);
+                perror("[OPERATORE] msgsnd");
+            }
             return;
         }
 
@@ -218,19 +309,29 @@ void serve_user(void) {
         sem_post(&st->mutex);
     }
 
+    /* Registra il tempo PRIMA del servizio per calcolare correttamente l'attesa */
+    struct timespec t_inizio_servizio;
+    clock_gettime(CLOCK_REALTIME, &t_inizio_servizio);
+
     /* Calcola tempo di servizio */
     long t_ns = get_service_time_ns();
     nanosleep(&(struct timespec){ .tv_sec = t_ns / 1000000000,
                                   .tv_nsec = t_ns % 1000000000 }, NULL);
 
     /* Risposta */
-    res.mtype = req.user_id;
+    memset(&res, 0, sizeof(res));
+    res.mtype         = req.user_id + 1;   
+    res.user_id = req.user_id;
     res.esito = 0;
     res.piatto_servito = req.piatto_scelto;
-    clock_gettime(CLOCK_REALTIME, &res.t_servizio);
+    res.t_servizio = t_inizio_servizio;
 
-    size_t res_size = sizeof(msg_response_t) - sizeof(long);
-    msgsnd(msgid, &res, res_size, 0);
+    size_t res_size = MSG_RES_SIZE;
+    if (msgsnd(msgid, &res, res_size, 0) < 0) {
+                fprintf(stderr, "[OPERATORE DEBUG] msgsnd fallita: msgid=%d, res_size=%zu, mtype=%ld, errno=%d\n",
+        msgid, (size_t)MSG_RES_SIZE, res.mtype, errno);
+        perror("[OPERATORE] msgsnd");
+    }
 
     /* Aggiorna statistiche */
     update_stats_on_service(&req, &res);
@@ -290,25 +391,46 @@ void update_stats_on_service(msg_request_t *req, msg_response_t *res) {
         case 0:
             day->tempo_attesa_primi_ns += wait_ns;
             day->piatti_primi_serviti++;
-            day->ricavo_giornaliero += shm->PRICEPRIMI;
+            /* Il ricavo viene aggiornato solo alla cassa */
             break;
 
         case 1:
             day->tempo_attesa_secondi_ns += wait_ns;
             day->piatti_secondi_serviti++;
-            day->ricavo_giornaliero += shm->PRICESECONDI;
+            /* Il ricavo viene aggiornato solo alla cassa */
             break;
 
         case 2:
             day->tempo_attesa_coffee_ns += wait_ns;
             day->piatti_coffee_serviti++;
-            day->ricavo_giornaliero += shm->PRICECOFFEE;
+            /* Il ricavo viene aggiornato solo alla cassa */
             break;
 
         case 3:
+            /* CASSA: calcola il totale in base ai piatti presi dall'utente */
             day->tempo_attesa_cassa_ns += wait_ns;
+            
+            double totale = 0.0;
+            
+            if (req->ha_primo) {
+                totale += shm->PRICEPRIMI;
+            }
+            if (req->ha_secondo) {
+                totale += shm->PRICESECONDI;
+            }
+            if (req->ha_coffee) {
+                totale += shm->PRICECOFFEE;
+            }
+            
+            day->ricavo_giornaliero += totale;
+            
+            printf("[CASSIERE %d] Utente %d - Primo:%d Secondo:%d Coffee:%d - Totale: %.2f€\n",
+                   operator_id, req->user_id, req->ha_primo, req->ha_secondo, 
+                   req->ha_coffee, totale);
+            
+            /* Incrementa utenti_serviti solo alla cassa (fine del servizio completo) */
+            day->utenti_serviti++;
+            
             break;
     }
-
-    day->utenti_serviti++;
 }

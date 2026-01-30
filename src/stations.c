@@ -68,20 +68,23 @@ void stations_refill_day(shm_t *shm) {
 /* ---------------------------------------------------------
    Refill periodico (ogni 10 minuti simulati)
    Chiamata da mensa.c durante il giorno
+   Incrementa di 1 porzione fino a MAX_PORZIONI per ogni tipo di piatto
    --------------------------------------------------------- */
 void stations_refill_periodic(shm_t *shm) {
 
-    /* PRIMI */
+    /* PRIMI: incrementa di 1 fino al massimo */
     for (int i = 0; i < shm->menu_primi_count; i++) {
         if (shm->st_primi.porzioni[i] < shm->MAXPORZIONIPRIMI)
             shm->st_primi.porzioni[i]++;
     }
 
-    /* SECONDI */
+    /* SECONDI: incrementa di 1 fino al massimo */
     for (int i = 0; i < shm->menu_secondi_count; i++) {
         if (shm->st_secondi.porzioni[i] < shm->MAXPORZIONISECONDI)
             shm->st_secondi.porzioni[i]++;
     }
+
+    /* COFFEE e CASSA: porzioni illimitate (già inizializzate a -1) */
 }
 
 /* ---------------------------------------------------------
@@ -94,58 +97,107 @@ void stations_assign_workers(shm_t *shm) {
 
     printf("[STATIONS] Assegnazione operatori alle stazioni...\n");
 
-    int workers = shm->NOFWORKERS;
+    const int NUM_STATIONS = 4;
+    int operatori_disponibili = shm->NOFWORKERS;
 
-    /* 1. Ogni stazione deve avere almeno un operatore */
-    shm->st_primi.postazioni_totali   = 1;
-    shm->st_secondi.postazioni_totali = 1;
-    shm->st_coffee.postazioni_totali  = 1;
-    shm->st_cassa.postazioni_totali   = 1;
-
-    workers -= 4;
-
-    if (workers < 0) {
-        printf("[STATIONS] ERRORE: operatori insufficienti!\n");
+    /* Verifica che ci siano abbastanza operatori (almeno 1 per stazione) */
+    if (operatori_disponibili < NUM_STATIONS) {
+        printf("[STATIONS] ERRORE: Servono almeno %d operatori (1 per stazione), disponibili: %d\n",
+               NUM_STATIONS, operatori_disponibili);
         exit(EXIT_FAILURE);
     }
 
-    /* 2. Distribuzione operatori rimanenti in base ai tempi medi */
-    while (workers > 0) {
+    /* Passo 1: Assegna almeno 1 operatore per stazione */
+    shm->st_primi.postazioni_totali = 1;
+    shm->st_secondi.postazioni_totali = 1;
+    shm->st_coffee.postazioni_totali = 1;
+    shm->st_cassa.postazioni_totali = 1;
+    operatori_disponibili -= NUM_STATIONS;
 
-        /* Ordine di priorità (più lento → più operatori) */
-        if (shm->AVGSRVCMAINCOURSE >= shm->AVGSRVCPRIMI &&
-            shm->AVGSRVCMAINCOURSE >= shm->AVGSRVCCOFFEE &&
-            shm->AVGSRVCMAINCOURSE >= shm->AVGSRVCCASSA) {
+    printf("[STATIONS] Tempi medi di servizio (ns):\n");
+    printf("  PRIMI:   %d ns\n", shm->AVGSRVCPRIMI);
+    printf("  SECONDI: %d ns\n", shm->AVGSRVCMAINCOURSE);
+    printf("  COFFEE:  %d ns\n", shm->AVGSRVCCOFFEE);
+    printf("  CASSA:   %d ns\n", shm->AVGSRVCCASSA);
 
-            shm->st_secondi.postazioni_totali++;
-        }
-        else if (shm->AVGSRVCPRIMI >= shm->AVGSRVCCOFFEE &&
-                 shm->AVGSRVCPRIMI >= shm->AVGSRVCCASSA) {
+    /* Passo 2: Calcola la somma totale dei tempi medi */
+    int tempo_totale = shm->AVGSRVCPRIMI + shm->AVGSRVCMAINCOURSE + 
+                       shm->AVGSRVCCOFFEE + shm->AVGSRVCCASSA;
 
-            shm->st_primi.postazioni_totali++;
-        }
-        else if (shm->AVGSRVCCOFFEE >= shm->AVGSRVCCASSA) {
-
-            shm->st_coffee.postazioni_totali++;
-        }
-        else {
-            shm->st_cassa.postazioni_totali++;
-        }
-
-        workers--;
+    if (tempo_totale <= 0) {
+        printf("[STATIONS] ATTENZIONE: tempi di servizio non validi, uso distribuzione uniforme\n");
+        tempo_totale = 1;
     }
 
-    printf("[STATIONS] Postazioni assegnate:\n");
-    printf("  PRIMI : operatori a lavoro %d\n", shm->st_primi.postazioni_totali);
-    printf("  SECONDI: operatori a lavoro %d\n", shm->st_secondi.postazioni_totali);
-    printf("  COFFEE:  operatori a lavoro %d\n", shm->st_coffee.postazioni_totali);
-    printf("  CASSA:   operatori a lavoro %d\n", shm->st_cassa.postazioni_totali);
+    /* Passo 3: Distribuisci gli operatori rimanenti in modo proporzionale ai tempi medi */
+    if (operatori_disponibili > 0) {
+        /* Calcola operatori aggiuntivi per ciascuna stazione */
+        double ratio_primi = (double)shm->AVGSRVCPRIMI / tempo_totale;
+        double ratio_secondi = (double)shm->AVGSRVCMAINCOURSE / tempo_totale;
+        double ratio_coffee = (double)shm->AVGSRVCCOFFEE / tempo_totale;
+        double ratio_cassa = (double)shm->AVGSRVCCASSA / tempo_totale;
+
+        int extra_primi = (int)(ratio_primi * operatori_disponibili);
+        int extra_secondi = (int)(ratio_secondi * operatori_disponibili);
+        int extra_coffee = (int)(ratio_coffee * operatori_disponibili);
+        int extra_cassa = (int)(ratio_cassa * operatori_disponibili);
+
+        /* Assegna gli operatori extra */
+        shm->st_primi.postazioni_totali += extra_primi;
+        shm->st_secondi.postazioni_totali += extra_secondi;
+        shm->st_coffee.postazioni_totali += extra_coffee;
+        shm->st_cassa.postazioni_totali += extra_cassa;
+
+        /* Gestisci eventuali operatori rimanenti per arrotondamento */
+        int assegnati = extra_primi + extra_secondi + extra_coffee + extra_cassa;
+        int rimanenti = operatori_disponibili - assegnati;
+
+        /* Assegna i rimanenti alla stazione più lenta */
+        if (rimanenti > 0) {
+            int max_time = shm->AVGSRVCPRIMI;
+            station_t *max_station = &shm->st_primi;
+
+            if (shm->AVGSRVCMAINCOURSE > max_time) {
+                max_time = shm->AVGSRVCMAINCOURSE;
+                max_station = &shm->st_secondi;
+            }
+            if (shm->AVGSRVCCOFFEE > max_time) {
+                max_time = shm->AVGSRVCCOFFEE;
+                max_station = &shm->st_coffee;
+            }
+            if (shm->AVGSRVCCASSA > max_time) {
+                max_station = &shm->st_cassa;
+            }
+
+            max_station->postazioni_totali += rimanenti;
+        }
+    }
+
+    /* Verifica finale */
+    int total_assigned = shm->st_primi.postazioni_totali + 
+                         shm->st_secondi.postazioni_totali +
+                         shm->st_coffee.postazioni_totali + 
+                         shm->st_cassa.postazioni_totali;
+
+    printf("[STATIONS] Postazioni assegnate (su %d operatori):\n", shm->NOFWORKERS);
+    printf("  PRIMI:   %d postazioni (%.1f%%)\n", shm->st_primi.postazioni_totali,
+           100.0 * shm->st_primi.postazioni_totali / shm->NOFWORKERS);
+    printf("  SECONDI: %d postazioni (%.1f%%)\n", shm->st_secondi.postazioni_totali,
+           100.0 * shm->st_secondi.postazioni_totali / shm->NOFWORKERS);
+    printf("  COFFEE:  %d postazioni (%.1f%%)\n", shm->st_coffee.postazioni_totali,
+           100.0 * shm->st_coffee.postazioni_totali / shm->NOFWORKERS);
+    printf("  CASSA:   %d postazioni (%.1f%%)\n", shm->st_cassa.postazioni_totali,
+           100.0 * shm->st_cassa.postazioni_totali / shm->NOFWORKERS);
+    printf("  TOTALE:  %d postazioni\n", total_assigned);
 }
 
 /* ---------------------------------------------------------
    Calcolo piatti avanzati a fine giornata
    --------------------------------------------------------- */
 void stations_compute_leftovers(shm_t *shm) {
+
+    shm->stats_giorno.piatti_primi_avanzati = 0;
+    shm->stats_giorno.piatti_secondi_avanzati = 0;
 
     /* PRIMI */
     for (int i = 0; i < shm->menu_primi_count; i++)

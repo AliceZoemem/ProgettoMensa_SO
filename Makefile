@@ -55,3 +55,23 @@ clean:
 # ------------------------------------------------------------
 run: all
 	./mensa
+
+# ------------------------------------------------------------
+# Test diverse configurazioni
+# ------------------------------------------------------------
+test-timeout: all
+	@echo "=========================================="
+	@echo "Test configurazione TIMEOUT"
+	@echo "=========================================="
+	./mensa config_timeout.conf
+
+test-overload: all
+	@echo "=========================================="
+	@echo "Test configurazione OVERLOAD"
+	@echo "=========================================="
+	./mensa config_overload.conf
+
+test-all: test-timeout test-overload
+	@echo "=========================================="
+	@echo "Tutti i test completati"
+	@echo "=========================================="
