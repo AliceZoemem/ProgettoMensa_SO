@@ -352,7 +352,6 @@ void update_stats_on_service(msg_request_t *req, msg_response_t *res) {
                    operator_id, req->user_id, req->ha_primo, req->ha_secondo, 
                    req->ha_coffee, totale);
             */
-            day->utenti_serviti++;
             break;
     }
 

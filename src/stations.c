@@ -43,8 +43,9 @@ void stations_init(shm_t *shm) {
 
 void stations_refill_day(shm_t *shm) {
     printf("[STATIONS] Refill iniziale del giorno...\n");
-    for (int i = 0; i < shm->menu_primi_count; i++)
+    for (int i = 0; i < shm->menu_primi_count; i++){
         shm->st_primi.porzioni[i] = shm->AVGREFILLPRIMI;
+    }
 
     for (int i = 0; i < shm->menu_secondi_count; i++)
         shm->st_secondi.porzioni[i] = shm->AVGREFILLSECONDI;

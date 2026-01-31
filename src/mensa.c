@@ -233,8 +233,6 @@ void end_day(int day) {
     printf("[MENSA] Tutti gli utenti hanno completato il giorno\n");
     nanosleep(&(struct timespec){0, 100000000}, NULL);
     
-    printf("[MENSA] Utenti in attesa a fine giornata: %d\n", shm->stats_giorno.utenti_in_attesa);
-    
     if (shm->stats_giorno.utenti_in_attesa > 0) {
         printf("[MENSA] ATTENZIONE: %d utenti non hanno completato il servizio\n", 
                shm->stats_giorno.utenti_in_attesa);

@@ -1,0 +1,1082 @@
+mkdir -p obj
+gcc -Wall -Wextra -pedantic -std=gnu99 -g -Iinclude -c src/stations.c -o obj/stations.o
+gcc -Wall -Wextra -pedantic -std=gnu99 -g -Iinclude -o mensa obj/mensa.o obj/ipc.o obj/stations.o obj/stats.o obj/config.o obj/util.o -pthread
+gcc -Wall -Wextra -pedantic -std=gnu99 -g -Iinclude -o operatore obj/operatore.o obj/ipc.o obj/stations.o obj/stats.o obj/config.o obj/util.o -pthread
+gcc -Wall -Wextra -pedantic -std=gnu99 -g -Iinclude -o utente obj/utente.o obj/ipc.o obj/stations.o obj/stats.o obj/config.o obj/util.o -pthread
+==========================================
+Test configurazione TIMEOUT
+==========================================
+./mensa config_timeout.conf
+[MENSA] Avvio del processo responsabile...
+[MENSA] Usando file di configurazione: config_timeout.conf
+[CONFIG] Caricamento configurazione da config_timeout.conf
+[IPC] Inizializzazione semaforo tavoli con 30 posti
+[STATIONS] Inizializzazione stazioni...
+[MENSA] Attesa inizializzazione di operatori e utenti...
+[MENSA] Tutti i processi sono pronti. Avvio simulazione.
+[STATIONS] Assegnazione operatori alle stazioni...
+[STATIONS] Tempi medi di servizio (ns):
+  PRIMI:   1 ns
+  SECONDI: 1 ns
+  COFFEE:  1 ns
+  CASSA:   1 ns
+[STATIONS] Postazioni assegnate (su 10 operatori):
+  PRIMI:   4 postazioni (40.0%)
+  SECONDI: 2 postazioni (20.0%)
+  COFFEE:  2 postazioni (20.0%)
+  CASSA:   2 postazioni (20.0%)
+  TOTALE:  10 postazioni
+[STATIONS] Refill iniziale del giorno...
+Primi Refill 15 id 0
+Primi Refill 15 id 1
+Primi Refill 15 id 2
+[MENSA] Simulazione per 3 giorni...
+
+[MENSA] --- Inizio giorno 1 ---
+Primi Refill Periodic 1 id 0 giorno 1
+Primi Refill Periodic 2 id 1 giorno 1
+Primi Refill Periodic 3 id 2 giorno 1
+Primi Refill Periodic 1 id 0 giorno 1
+Primi Refill Periodic 2 id 1 giorno 1
+Primi Refill Periodic 3 id 2 giorno 1
+Primi Refill Periodic 1 id 0 giorno 1
+Primi Refill Periodic 2 id 1 giorno 1
+Primi Refill Periodic 3 id 2 giorno 1
+Primi Refill Periodic 1 id 0 giorno 1
+Primi Refill Periodic 2 id 1 giorno 1
+Primi Refill Periodic 3 id 2 giorno 1
+Primi Refill Periodic 1 id 0 giorno 1
+Primi Refill Periodic 2 id 1 giorno 1
+Primi Refill Periodic 3 id 2 giorno 1
+Primi Refill Periodic 1 id 0 giorno 1
+Primi Refill Periodic 2 id 1 giorno 1
+Primi Refill Periodic 3 id 2 giorno 1
+Primi Refill Periodic 1 id 0 giorno 1
+Primi Refill Periodic 2 id 1 giorno 1
+Primi Refill Periodic 3 id 2 giorno 1
+Primi Refill Periodic 1 id 0 giorno 1
+Primi Refill Periodic 2 id 1 giorno 1
+Primi Refill Periodic 3 id 2 giorno 1
+Primi Refill Periodic 1 id 0 giorno 1
+Primi Refill Periodic 2 id 1 giorno 1
+Primi Refill Periodic 3 id 2 giorno 1
+Primi Refill Periodic 1 id 0 giorno 1
+Primi Refill Periodic 2 id 1 giorno 1
+Primi Refill Periodic 3 id 2 giorno 1
+Primi Refill Periodic 1 id 0 giorno 1
+Primi Refill Periodic 2 id 1 giorno 1
+Primi Refill Periodic 3 id 2 giorno 1
+Primi Refill Periodic 1 id 0 giorno 1
+Primi Refill Periodic 2 id 1 giorno 1
+Primi Refill Periodic 3 id 2 giorno 1
+Primi Refill Periodic 1 id 0 giorno 1
+Primi Refill Periodic 2 id 1 giorno 1
+Primi Refill Periodic 3 id 2 giorno 1
+Primi Refill Periodic 1 id 0 giorno 1
+Primi Refill Periodic 2 id 1 giorno 1
+Primi Refill Periodic 3 id 2 giorno 1
+Primi Refill Periodic 1 id 0 giorno 1
+Primi Refill Periodic 2 id 1 giorno 1
+Primi Refill Periodic 3 id 2 giorno 1
+Primi Refill Periodic 1 id 0 giorno 1
+Primi Refill Periodic 2 id 1 giorno 1
+Primi Refill Periodic 3 id 2 giorno 1
+Primi Refill Periodic 1 id 0 giorno 1
+Primi Refill Periodic 2 id 1 giorno 1
+Primi Refill Periodic 3 id 2 giorno 1
+Primi Refill Periodic 1 id 0 giorno 1
+Primi Refill Periodic 2 id 1 giorno 1
+Primi Refill Periodic 3 id 2 giorno 1
+Primi Refill Periodic 0 id 0 giorno 1
+Primi Refill Periodic 1 id 1 giorno 1
+Primi Refill Periodic 2 id 2 giorno 1
+Primi Refill Periodic 0 id 0 giorno 1
+Primi Refill Periodic 1 id 1 giorno 1
+Primi Refill Periodic 2 id 2 giorno 1
+Primi Refill Periodic 0 id 0 giorno 1
+Primi Refill Periodic 1 id 1 giorno 1
+Primi Refill Periodic 2 id 2 giorno 1
+Primi Refill Periodic 0 id 0 giorno 1
+Primi Refill Periodic 0 id 1 giorno 1
+Primi Refill Periodic 0 id 2 giorno 1
+Primi Refill Periodic 0 id 0 giorno 1
+Primi Refill Periodic 0 id 1 giorno 1
+Primi Refill Periodic 0 id 2 giorno 1
+Primi Refill Periodic 0 id 0 giorno 1
+Primi Refill Periodic 0 id 1 giorno 1
+Primi Refill Periodic 0 id 2 giorno 1
+[MENSA] Fine giorno 1
+[MENSA] Tutti gli utenti hanno completato il giorno
+[MENSA] Utenti in attesa a fine giornata: 16
+[MENSA] ATTENZIONE: 16 utenti non hanno completato il servizio
+
+================== STATISTICHE GIORNO 1 ==================
+Utenti serviti:            19
+Utenti non serviti:        16
+Utenti in attesa (fine giornata): 16
+
+Piatti serviti:
+  Primi:                   30
+  Secondi:                 30
+  Coffee/Dolci:            16
+
+Piatti avanzat[OPERATORE 3] Avviato su stazione 3
+[OPERATORE 3] Competizione per postazione alla stazione 3
+[OPERATORE 3] Postazione acquisita, inizio turno
+[OPERATORE 3] Fine turno giornaliero
+[OPERATORE 3] Competizione per postazione alla stazione 3
+[OPERATORE 3] Postazione acquisita, inizio turno
+[OPERATORE 3] Fine turno giornaliero
+[OPERATORE 8] Avviato su stazione 0
+[OPERATORE 8] Competizione per postazione alla stazione 0
+[OPERATORE 8] Postazione acquisita, inizio turno
+[OPERATORE 8] Fine turno giornaliero
+[OPERATORE 8] Competizione per postazione alla stazione 0
+[OPERATORE 8] Postazione acquisita, inizio turno
+[OPERATORE 8] Fine turno giornaliero
+[OPERATORE 4] Avviato su stazione 0
+[OPERATORE 4] Competizione per postazione alla stazione 0
+[OPERATORE 4] Postazione acquisita, inizio turno
+[OPERATORE 4] Pausa 1/2 (postazioni ora: 1/4)
+[OPERATORE 4] Fine turno giornaliero
+[OPERATORE 4] Competizione per postazione alla stazione 0
+[OPERATORE 4] Postazione acquisita, inizio turno
+[OPERATORE 4] Fine turno giornaliero
+i:
+  Primi:                   75
+  Secondi:                 75
+
+Tempi medi di attesa (ms):
+  Stazione primi:          28 ms
+  Stazione secondi:        23 ms
+  Stazione coffee:         15 ms
+  Cassa:                   15 ms
+
+Operatori attivi:          10
+Pause totali:              5
+
+Ricavo giornaliero:        205.50 €
+===========================================================
+
+
+[MENSA] --- Inizio giorno 2 ---
+[STATIONS] Assegnazione operatori alle stazioni...
+[STATIONS] Tempi medi di servizio (ns):
+  PRIMI:   1 ns
+  SECONDI: 1 ns
+  COFFEE:  1 ns
+  CASSA:   1 ns
+[STATIONS] Postazioni assegnate (su 10 operatori):
+  PRIMI:   4 postazioni (40.0%)
+  SECONDI: 2 postazioni (20.0%)
+  COFFEE:  2 postazioni (20.0%)
+  CASSA:   2 postazioni (20.0%)
+  TOTALE:  10 postazioni
+[STATIONS] Refill iniziale del giorno...
+Primi Refill 15 id 0
+Primi Refill 15 id 1
+Primi Refill 15 id 2
+Primi Refill Periodic 1 id 0 giorno 2
+Primi Refill Periodic 2 id 1 giorno 2
+Primi Refill Periodic 3 id 2 giorno 2
+Primi Refill Periodic 1 id 0 giorno 2
+Primi Refill Periodic 2 id 1 giorno 2
+Primi Refill Periodic 3 id 2 giorno 2
+Primi Refill Periodic 1 id 0 giorno 2
+Primi Refill Periodic 2 id 1 giorno 2
+Primi Refill Periodic 3 id 2 giorno 2
+Primi Refill Periodic 1 id 0 giorno 2
+Primi Refill Periodic 2 id 1 giorno 2
+Primi Refill Periodic 3 id 2 giorno 2
+Primi Refill Periodic 1 id 0 giorno 2
+Primi Refill Periodic 2 id 1 giorno 2
+Primi Refill Periodic 3 id 2 giorno 2
+Primi Refill Periodic 1 id 0 giorno 2
+Primi Refill Periodic 2 id 1 giorno 2
+Primi Refill Periodic 3 id 2 giorno 2
+Primi Refill Periodic 1 id 0 giorno 2
+Primi Refill Periodic 2 id 1 giorno 2
+Primi Refill Periodic 3 id 2 giorno 2
+Primi Refill Periodic 1 id 0 giorno 2
+Primi Refill Periodic 2 id 1 giorno 2
+Primi Refill Periodic 3 id 2 giorno 2
+Primi Refill Periodic 1 id 0 giorno 2
+Primi Refill Periodic 2 id 1 giorno 2
+Primi Refill Periodic 3 id 2 giorno 2
+Primi Refill Periodic 1 id 0 giorno 2
+Primi Refill Periodic 2 id 1 giorno 2
+Primi Refill Periodic 3 id 2 giorno 2
+Primi Refill Periodic 1 id 0 giorno 2
+Primi Refill Periodic 2 id 1 giorno 2
+Primi Refill Periodic 3 id 2 giorno 2
+Primi Refill Periodic 1 id 0 giorno 2
+Primi Refill Periodic 2 id 1 giorno 2
+Primi Refill Periodic 3 id 2 giorno 2
+Primi Refill Periodic 1 id 0 giorno 2
+Primi Refill Periodic 2 id 1 giorno 2
+Primi Refill Periodic 3 id 2 giorno 2
+Primi Refill Periodic 1 id 0 giorno 2
+Primi Refill Periodic 2 id 1 giorno 2
+Primi Refill Periodic 3 id 2 giorno 2
+Primi Refill Periodic 1 id 0 giorno 2
+Primi Refill Periodic 1 id 1 giorno 2
+Primi Refill Periodic 2 id 2 giorno 2
+Primi Refill Periodic 1 id 0 giorno 2
+Primi Refill Periodic 1 id 1 giorno 2
+Primi Refill Periodic 2 id 2 giorno 2
+Primi Refill Periodic 1 id 0 giorno 2
+Primi Refill Periodic 1 id 1 giorno 2
+Primi Refill Periodic 2 id 2 giorno 2
+Primi Refill Periodic 1 id 0 giorno 2
+Primi Refill Periodic 1 id 1 giorno 2
+Primi Refill Periodic 2 id 2 giorno 2
+Primi Refill Periodic 1 id 0 giorno 2
+Primi Refill Periodic 1 id 1 giorno 2
+Primi Refill Periodic 2 id 2 giorno 2
+Primi Refill Periodic 1 id 0 giorno 2
+Primi Refill Periodic 1 id 1 giorno 2
+Primi Refill Periodic 2 id 2 giorno 2
+Primi Refill Periodic 1 id 0 giorno 2
+Primi Refill Periodic 1 id 1 giorno 2
+Primi Refill Periodic 2 id 2 giorno 2
+Primi Refill Periodic 1 id 0 giorno 2
+Primi Refill Periodic 1 id 1 giorno 2
+Primi Refill Periodic 2 id 2 giorno 2
+Primi Refill Periodic 1 id 0 giorno 2
+Primi Refill Periodic 1 id 1 giorno 2
+Primi Refill Periodic 2 id 2 giorno 2
+Primi Refill Periodic 0 id 0 giorno 2
+Primi Refill Periodic 0 id 1 giorno 2
+Primi Refill Periodic 0 id 2 giorno 2
+[MENSA] Fine giorno 2
+[MENSA] Tutti gli utenti hanno completato il giorno
+[MENSA] Utenti in attesa a fine giornata: 21
+[MENSA] ATTENZIONE: 21 utenti non hanno completato il servizio
+
+================== STATISTICHE GIORNO 2 ==================
+Utenti serviti:            23
+Utenti non serviti:        21
+Utenti in attesa (fine giornata): 21
+
+Piatti serviti:
+  Primi:                   30
+  Secondi:                 30
+  Coffee/Dolci:            16
+
+Piatti avanzati:
+  Primi:         [OPERATORE 7] Avviato su stazione 3
+[OPERATORE 7] Competizione per postazione alla stazione 3
+[OPERATORE 7] Postazione acquisita, inizio turno
+[OPERATORE 7] Pausa 1/2 (postazioni ora: 1/2)
+[OPERATORE 7] Fine turno giornaliero
+[OPERATORE 7] Competizione per postazione alla stazione 3
+[OPERATORE 7] Postazione acquisita, inizio turno
+[OPERATORE 7] Fine turno giornaliero
+[OPERATORE 2] Avviato su stazione 2
+[OPERATORE 2] Competizione per postazione alla stazione 2
+[OPERATORE 2] Postazione acquisita, inizio turno
+[OPERATORE 2] Pausa 1/2 (postazioni ora: 1/2)
+[OPERATORE 2] Fine turno giornaliero
+[OPERATORE 2] Competizione per postazione alla stazione 2
+[OPERATORE 2] Postazione acquisita, inizio turno
+[OPERATORE 2] Fine turno giornaliero
+[OPERATORE 6] Avviato su stazione 2
+[OPERATORE 6] Competizione per postazione alla stazione 2
+[OPERATORE 6] Postazione acquisita, inizio turno
+[OPERATORE 6] Fine turno giornaliero
+[OPERATORE 6] Competizione per postazione alla stazione 2
+[OPERATORE 6] Postazione acquisita, inizio turno
+[OPERATORE 6] Fine turno giornaliero
+[OPERATORE 6] Competizione per postazione alla stazione 2
+[OPERATORE 6] Postazione acquisita, inizio turno
+[OPERATORE 6] Fine turno giornaliero
+[OPERATORE 1] Avviato su stazione 1
+[OPERATORE 1] Competizione per postazione alla stazione 1
+[OPERATORE 1] Postazione acquisita, inizio turno
+[OPERATORE 1] Pausa 1/2 (postazioni ora: 1/2)
+[OPERATORE 1] Fine turno giornaliero
+[OPERATORE 1] Competizione per postazione alla stazione 1
+[OPERATORE 1] Postazione acquisita, inizio turno
+[OPERATORE 1] Fine turno giornaliero
+          75
+  Secondi:                 75
+
+Tempi medi di attesa (ms):
+  Stazione primi:          12 ms
+  Stazione secondi:        56 ms
+  Stazione coffee:         14 ms
+  Cassa:                   14 ms
+
+Operatori attivi:          10
+Pause totali:              1
+
+Ricavo giornaliero:        252.30 €
+===========================================================
+
+
+[MENSA] --- Inizio giorno 3 ---
+[STATIONS] Assegnazione operatori alle stazioni...
+[STATIONS] Tempi medi di servizio (ns):
+  PRIMI:   1 ns
+  SECONDI: 1 ns
+  COFFEE:  1 ns
+  CASSA:   1 ns
+[STATIONS] Postazioni assegnate (su 10 operatori):
+  PRIMI:   4 postazioni (40.0%)
+  SECONDI: 2 postazioni (20.0%)
+  COFFEE:  2 postazioni (20.0%)
+  CASSA:   2 postazioni (20.0%)
+  TOTALE:  10 postazioni
+[STATIONS] Refill iniziale del giorno...
+Primi Refill 15 id 0
+Primi Refill 15 id 1
+Primi Refill 15 id 2
+Primi Refill Periodic 1 id 0 giorno 3
+Primi Refill Periodic 2 id 1 giorno 3
+Primi Refill Periodic 3 id 2 giorno 3
+Primi Refill Periodic 1 id 0 giorno 3
+Primi Refill Periodic 2 id 1 giorno 3
+Primi Refill Periodic 3 id 2 giorno 3
+Primi Refill Periodic 1 id 0 giorno 3
+Primi Refill Periodic 2 id 1 giorno 3
+Primi Refill Periodic 3 id 2 giorno 3
+Primi Refill Periodic 1 id 0 giorno 3
+Primi Refill Periodic 2 id 1 giorno 3
+Primi Refill Periodic 3 id 2 giorno 3
+Primi Refill Periodic 1 id 0 giorno 3
+Primi Refill Periodic 2 id 1 giorno 3
+Primi Refill Periodic 3 id 2 giorno 3
+Primi Refill Periodic 1 id 0 giorno 3
+Primi Refill Periodic 2 id 1 giorno 3
+Primi Refill Periodic 3 id 2 giorno 3
+Primi Refill Periodic 1 id 0 giorno 3
+Primi Refill Periodic 2 id 1 giorno 3
+Primi Refill Periodic 3 id 2 giorno 3
+Primi Refill Periodic 1 id 0 giorno 3
+Primi Refill Periodic 2 id 1 giorno 3
+Primi Refill Periodic 3 id 2 giorno 3
+Primi Refill Periodic 1 id 0 giorno 3
+Primi Refill Periodic 2 id 1 giorno 3
+Primi Refill Periodic 3 id 2 giorno 3
+Primi Refill Periodic 1 id 0 giorno 3
+Primi Refill Periodic 2 id 1 giorno 3
+Primi Refill Periodic 3 id 2 giorno 3
+Primi Refill Periodic 1 id 0 giorno 3
+Primi Refill Periodic 2 id 1 giorno 3
+Primi Refill Periodic 3 id 2 giorno 3
+Primi Refill Periodic 1 id 0 giorno 3
+Primi Refill Periodic 2 id 1 giorno 3
+Primi Refill Periodic 3 id 2 giorno 3
+Primi Refill Periodic 1 id 0 giorno 3
+Primi Refill Periodic 2 id 1 giorno 3
+Primi Refill Periodic 3 id 2 giorno 3
+Primi Refill Periodic 1 id 0 giorno 3
+Primi Refill Periodic 2 id 1 giorno 3
+Primi Refill Periodic 3 id 2 giorno 3
+Primi Refill Periodic 1 id 0 giorno 3
+Primi Refill Periodic 2 id 1 giorno 3
+Primi Refill Periodic 3 id 2 giorno 3
+Primi Refill Periodic 1 id 0 giorno 3
+Primi Refill Periodic 2 id 1 giorno 3
+Primi Refill Periodic 3 id 2 giorno 3
+Primi Refill Periodic 1 id 0 giorno 3
+Primi Refill Periodic 2 id 1 giorno 3
+Primi Refill Periodic 3 id 2 giorno 3
+Primi Refill Periodic 1 id 0 giorno 3
+Primi Refill Periodic 2 id 1 giorno 3
+Primi Refill Periodic 3 id 2 giorno 3
+Primi Refill Periodic 1 id 0 giorno 3
+Primi Refill Periodic 2 id 1 giorno 3
+Primi Refill Periodic 2 id 2 giorno 3
+Primi Refill Periodic 0 id 0 giorno 3
+Primi Refill Periodic 1 id 1 giorno 3
+Primi Refill Periodic 1 id 2 giorno 3
+Primi Refill Periodic 0 id 0 giorno 3
+Primi Refill Periodic 1 id 1 giorno 3
+Primi Refill Periodic 1 id 2 giorno 3
+Primi Refill Periodic 0 id 0 giorno 3
+Primi Refill Periodic 1 id 1 giorno 3
+Primi Refill Periodic 1 id 2 giorno 3
+Primi Refill Periodic 0 id 0 giorno 3
+Primi Refill Periodic 1 id 1 giorno 3
+Primi Refill Periodic 1 id 2 giorno 3
+Primi Refill Periodic 0 id 0 giorno 3
+Primi Refill Periodic 0 id 1 giorno 3
+Primi Refill Periodic 0 id 2 giorno 3
+[MENSA] Fine giorno 3
+[MENSA] Tutti gli utenti hanno completato il giorno
+[MENSA] Utenti in attesa a fine giornata: 18
+[MENSA] ATTENZIONE: 18 utenti non hanno completato il servizio
+
+================== STATISTICHE GIORNO 3 ==================
+Utenti serviti:            18
+Utenti non serviti:        18
+Utenti in attesa (fine giornata): 18
+
+Piatti serviti:
+  Primi:                   30
+  Secondi:                 30
+  Coffee/Dolci:            14
+
+Piatti avanzati:
+  Primi:                   75
+  Secon[UTENTE 20] Servito alla stazione 0
+[UTENTE 20] Servito alla stazione 1
+[UTENTE 20] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:0)
+[UTENTE 20] Ha pagato alla cassa
+[UTENTE 20] Cerca un tavolo libero...
+[UTENTE 20] Posto a tavola acquisito (tavoli liberi ora: 23/30)
+[UTENTE 20] Ha finito di mangiare, lascia il tavolo
+[UTENTE 20] Tavolo liberato (tavoli liberi ora: 26/30)
+[UTENTE 20] Ha finito e lascia la mensa per oggi
+[UTENTE 20] Servito alla stazione 0
+[UTENTE 20] Servito alla stazione 1
+[UTENTE 20] Servito alla stazione 2
+[UTENTE 20] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:1)
+[UTENTE 20] Simulazione terminata mentre ero in coda alla cassa
+[UTENTE 20] Servito alla stazione 0
+[UTENTE 20] Servito alla stazione 1
+[UTENTE 20] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:0)
+[UTENTE 20] Ha pagato alla cassa
+[UTENTE 20] Cerca un tavolo libero...
+[UTENTE 20] Posto a tavola acquisito (tavoli liberi ora: 27/30)
+[UTENTE 20] Ha finito di mangiare, lascia il tavolo
+[UTENTE 20] Tavolo liberato (tavoli liberi ora: 24/30)
+[UTENTE 20] Ha finito e lascia la mensa per oggi
+[UTENTE 12] Servito alla stazione 0
+[UTENTE 12] Servito alla stazione 1
+[UTENTE 12] Servito alla stazione 2
+[UTENTE 12] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:1)
+[UTENTE 12] Simulazione terminata mentre ero in coda alla cassa
+[UTENTE 12] Servito alla stazione 0
+[UTENTE 12] Servito alla stazione 1
+[UTENTE 12] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:0)
+[UTENTE 12] Ha pagato alla cassa
+[UTENTE 12] Cerca un tavolo libero...
+[UTENTE 12] Posto a tavola acquisito (tavoli liberi ora: 22/30)
+[UTENTE 12] Ha finito di mangiare, lascia il tavolo
+[UTENTE 12] Tavolo liberato (tavoli liberi ora: 30/30)
+[UTENTE 12] Ha finito e lascia la mensa per oggi
+[UTENTE 12] Servito alla stazione 0
+[UTENTE 12] Servito alla stazione 1
+[UTENTE 12] Servito alla stazione 2
+[UTENTE 12] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:1)
+[UTENTE 12] Simulazione terminata mentre ero in coda alla cassa
+[UTENTE 18] Servito alla stazione 0
+[UTENTE 18] Servito alla stazione 1
+[UTENTE 18] Servito alla stazione 2
+[UTENTE 18] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:1)
+[UTENTE 18] Simulazione terminata mentre ero in coda alla cassa
+[UTENTE 18] Servito alla stazione 0
+[UTENTE 18] Servito alla stazione 1
+[UTENTE 18] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:0)
+[UTENTE 18] Ha pagato alla cassa
+[UTENTE 18] Cerca un tavolo libero...
+[UTENTE 18] Posto a tavola acquisito (tavoli liberi ora: 23/30)
+[UTENTE 18] Ha finito di mangiare, lascia il tavolo
+[UTENTE 18] Tavolo liberato (tavoli liberi ora: 29/30)
+[UTENTE 18] Ha finito e lascia la mensa per oggi
+[UTENTE 18] Servito alla stazione 0
+[UTENTE 18] Servito alla stazione 1
+[UTENTE 18] Servito alla stazione 2
+[UTENTE 18] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:1)
+[UTENTE 18] Simulazione terminata mentre ero in coda alla cassa
+[UTENTE 23] Servito alla stazione 0
+[UTENTE 23] Servito alla stazione 1
+[UTENTE 23] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:0)
+[UTENTE 23] Ha pagato alla cassa
+[UTENTE 23] Cerca un tavolo libero...
+[UTENTE 23] Posto a tavola acquisito (tavoli liberi ora: 18/30)
+[UTENTE 23] Ha finito di mangiare, lascia il tavolo
+[UTENTE 23] Tavolo liberato (tavoli liberi ora: 25/30)
+[UTENTE 23] Ha finito e lascia la mensa per oggi
+[UTENTE 23] Servito alla stazione 0
+[UTENTE 23] Servito alla stazione 1
+[UTENTE 23] Simulazione terminata mentre ero in attesa
+[UTENTE 23] Servito alla stazione 0
+[UTENTE 23] Servito alla stazione 1
+[UTENTE 23] Servito alla stazione 2
+[UTENTE 23] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:1)
+[UTENTE 23] Simulazione terminata mentre ero in coda alla cassa
+[UTENTE 27] Servito alla stazione 0
+[UTENTE 27] Servito alla stazione 1
+[UTENTE 27] Servito alla stazione 2
+[UTENTE 27] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:1)
+[UTENTE 27] Simulazione terminata mentre ero in coda alla cassa
+[UTENTE 27] Servito alla stazione 0
+[UTENTE 27] Servito alla stazione 1
+[UTENTE 27] Servito alla stazione 2
+[UTENTE 27] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:1)
+[UTENTE 27] Simulazione terminata mentre ero in coda alla cassa
+[UTENTE 27] Servito alla stazione 0
+[UTENTE 27] Servito alla stazione 1
+[UTENTE 27] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:0)
+[UTENTE 27] Ha pagato alla cassa
+[UTENTE 27] Cerca un tavolo libero...
+[UTENTE 27] Posto a tavola acquisito (tavoli liberi ora: 20/30)
+[UTENTE 27] Ha finito di mangiare, lascia il tavolo
+[UTENTE 27] Tavolo liberato (tavoli liberi ora: 22/30)
+[UTENTE 27] Ha finito e lascia la mensa per oggi
+[UTENTE 29] Servito alla stazione 0
+[UTENTE 29] Servito alla stazione 1
+[UTENTE 29] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:0)
+[UTENTE 29] Ha pagato alla cassa
+[UTENTE 29] Cerca un tavolo libero...
+[UTENTE 29] Posto a tavola acquisito (tavoli liberi ora: 17/30)
+[UTENTE 29] Ha finito di mangiare, lascia il tavolo
+[UTENTE 29] Tavolo liberato (tavoli liberi ora: 28/30)
+[UTENTE 29] Ha finito e lascia la mensa per oggi
+[UTENTE 29] Servito alla stazione 0
+[UTENTE 29] Servito alla stazione 1
+[UTENTE 29] Servito alla stazione 2
+[UTENTE 29] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:1)
+[UTENTE 29] Simulazione terminata mentre ero in coda alla cassa
+[UTENTE 29] Servito alla stazione 0
+[UTENTE 29] Servito alla stazione 1
+[UTENTE 29] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:0)
+[UTENTE 29] Simulazione terminata mentre ero in coda alla cassa
+[UTENTE 15] Servito alla stazione 0
+[UTENTE 15] Servito alla stazione 1
+[UTENTE 15] Servito alla stazione 2
+[UTENTE 15] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:1)
+[UTENTE 15] Simulazione terminata mentre ero in coda alla cassa
+[UTENTE 15] Servito alla stazione 0
+[UTENTE 15] Servito alla stazione 1
+[UTENTE 15] Servito alla stazione 2
+[UTENTE 15] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:1)
+[UTENTE 15] Simulazione terminata mentre ero in coda alla cassa
+[UTENTE 15] Servito alla stazione 0
+[UTENTE 15] Servito alla stazione 1
+[UTENTE 15] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:0)
+[UTENTE 15] Simulazione terminata mentre ero in coda alla cassa
+[UTENTE 10] Servito alla stazione 0
+[UTENTE 10] Servito alla stazione 1
+[UTENTE 10] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:0)
+[UTENTE 10] Ha pagato alla cassa
+[UTENTE 10] Cerca un tavolo libero...
+[UTENTE 10] Posto a tavola acquisito (tavoli liberi ora: 22/30)
+[UTENTE 10] Ha finito di mangiare, lascia il tavolo
+[UTENTE 10] Tavolo liberato (tavoli liberi ora: 23/30)
+[UTENTE 10] Ha finito e lascia la mensa per oggi
+[UTENTE 10] Servito alla stazione 0
+[UTENTE 10] Servito alla stazione 1
+[UTENTE 10] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:0)
+[UTENTE 10] Ha pagato alla cassa
+[UTENTE 10] Cerca un tavolo libero...
+[UTENTE 10] Posto a tavola acquisito (tavoli liberi ora: 21/30)
+[UTENTE 10] Ha finito di mangiare, lascia il tavolo
+[UTENTE 10] Tavolo liberato (tavoli liberi ora: 27/30)
+[UTENTE 10] Ha finito e lascia la mensa per oggi
+[UTENTE 10] Servito alla stazione 0
+[UTENTE 10] Servito alla stazione 1
+[UTENTE 10] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:0)
+[UTENTE 10] Simulazione terminata mentre ero in coda alla cassa
+[UTENTE 24] Servito alla stazione 0
+[UTENTE 24] Servito alla stazione 1
+[UTENTE 24] Servito alla stazione 2
+[UTENTE 24] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:1)
+[UTENTE 24] Simulazione terminata mentre ero in coda alla cassa
+[UTENTE 24] Servito alla stazione 0
+[UTENTE 24] Servito alla stazione 1
+[UTENTE 24] Servito alla stazione 2
+[UTENTE 24] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:1)
+[UTENTE 24] Simulazione terminata mentre ero in coda alla cassa
+[UTENTE 24] Servito alla stazione 0
+[UTENTE 24] Servito alla stazione 1
+[UTENTE 24] Simulazione terminata mentre ero in attesa
+[UTENTE 3] Servito alla stazione 0
+[UTENTE 3] Servito alla stazione 1
+[UTENTE 3] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:0)
+[UTENTE 3] Ha pagato alla cassa
+[UTENTE 3] Cerca un tavolo libero...
+[UTENTE 3] Posto a tavola acquisito (tavoli liberi ora: 28/30)
+[UTENTE 3] Ha finito di mangiare, lascia il tavolo
+[UTENTE 3] Tavolo liberato (tavoli liberi ora: 30/30)
+[UTENTE 3] Ha finito e lascia la mensa per oggi
+[UTENTE 3] Servito alla stazione 0
+[UTENTE 3] Servito alla stazione 1
+[UTENTE 3] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:0)
+[UTENTE 3] Ha pagato alla cassa
+[UTENTE 3] Cerca un tavolo libero...
+[UTENTE 3] Posto a tavola acquisito (tavoli liberi ora: 24/30)
+[UTENTE 3] Ha finito di mangiare, lascia il tavolo
+[UTENTE 3] Tavolo liberato (tavoli liberi ora: 28/30)
+[UTENTE 3] Ha finito e lascia la mensa per oggi
+[UTENTE 3] Servito alla stazione 0
+[UTENTE 3] Servito alla stazione 1
+[UTENTE 3] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:0)
+[UTENTE 3] Ha pagato alla cassa
+[UTENTE 3] Cerca un tavolo libero...
+[UTENTE 3] Posto a tavola acquisito (tavoli liberi ora: 18/30)
+[UTENTE 3] Ha finito di mangiare, lascia il tavolo
+[UTENTE 3] Tavolo liberato (tavoli liberi ora: 21/30)
+[UTENTE 3] Ha finito e lascia la mensa per oggi
+[UTENTE 5] Servito alla stazione 0
+[UTENTE 5] Servito alla stazione 1
+[UTENTE 5] Servito alla stazione 2
+[UTENTE 5] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:1)
+[UTENTE 5] Simulazione terminata mentre ero in coda alla cassa
+[UTENTE 5] Servito alla stazione 0
+[UTENTE 5] Servito alla stazione 1
+[UTENTE 5] Servito alla stazione 2
+[UTENTE 5] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:1)
+[UTENTE 5] Simulazione terminata mentre ero in coda alla cassa
+[UTENTE 5] Servito alla stazione 0
+[UTENTE 5] Servito alla stazione 1
+[UTENTE 5] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:0)
+[UTENTE 5] Ha pagato alla cassa
+[UTENTE 5] Cerca un tavolo libero...
+[UTENTE 5] Posto a tavola acquisito (tavoli liberi ora: 19/30)
+[UTENTE 5] Ha finito di mangiare, lascia il tavolo
+[UTENTE 5] Tavolo liberato (tavoli liberi ora: 23/30)
+[UTENTE 5] Ha finito e lascia la mensa per oggi
+[UTENTE 16] Servito alla stazione 0
+[UTENTE 16] Servito alla stazione 1
+[UTENTE 16] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:0)
+[UTENTE 16] Ha pagato alla cassa
+[UTENTE 16] Cerca un tavolo libero...
+[UTENTE 16] Posto a tavola acquisito (tavoli liberi ora: 25/30)
+[UTENTE 16] Ha finito di mangiare, lascia il tavolo
+[UTENTE 16] Tavolo liberato (tavoli liberi ora: 17/30)
+[UTENTE 16] Ha finito e lascia la mensa per oggi
+[UTENTE 16] Servito alla stazione 0
+[UTENTE 16] Servito alla stazione 1
+[UTENTE 16] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:0)
+[UTENTE 16] Simulazione terminata mentre ero in coda alla cassa
+[UTENTE 16] Servito alla stazione 0
+[UTENTE 16] Servito alla stazione 1
+[UTENTE 16] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:0)
+[UTENTE 16] Ha pagato alla cassa
+[UTENTE 16] Cerca un tavolo libero...
+[UTENTE 16] Posto a tavola acquisito (tavoli liberi ora: 29/30)
+[UTENTE 16] Ha finito di mangiare, lascia il tavolo
+[UTENTE 16] Tavolo liberato (tavoli liberi ora: 19/30)
+[UTENTE 16] Ha finito e lascia la mensa per oggi
+[UTENTE 17] Servito alla stazione 0
+[UTENTE 17] Servito alla stazione 1
+[UTENTE 17] Servito alla stazione 2
+[UTENTE 17] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:1)
+[UTENTE 17] Simulazione terminata mentre ero in coda alla cassa
+[UTENTE 17] Servito alla stazione 0
+[UTENTE 17] Servito alla stazione 1
+[UTENTE 17] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:0)
+[UTENTE 17] Simulazione terminata mentre ero in coda alla cassa
+[UTENTE 17] Servito alla stazione 0
+[UTENTE 17] Servito alla stazione 1
+[UTENTE 17] Servito alla stazione 2
+[UTENTE 17] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:1)
+[UTENTE 17] Simulazione terminata mentre ero in coda alla cassa
+[UTENTE 11] Servito alla stazione 0
+[UTENTE 11] Servito alla stazione 1
+[UTENTE 11] Servito alla stazione 2
+[UTENTE 11] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:1)
+[UTENTE 11] Simulazione terminata mentre ero in coda alla cassa
+[UTENTE 11] Servito alla stazione 0
+[UTENTE 11] Servito alla stazione 1
+[UTENTE 11] Servito alla stazione 2
+[UTENTE 11] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:1)
+[UTENTE 11] Simulazione terminata mentre ero in coda alla cassa
+[UTENTE 11] Servito alla stazione 0
+[UTENTE 11] Servito alla stazione 1
+[UTENTE 11] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:0)
+[UTENTE 11] Ha pagato alla cassa
+[UTENTE 11] Cerca un tavolo libero...
+[UTENTE 11] Posto a tavola acquisito (tavoli liberi ora: 26/30)
+[UTENTE 11] Ha finito di mangiare, lascia il tavolo
+[UTENTE 11] Tavolo liberato (tavoli liberi ora: 25/30)
+[UTENTE 11] Ha finito e lascia la mensa per oggi
+[UTENTE 1] Servito alla stazione 0
+[UTENTE 1] Servito alla stazione 1
+[UTENTE 1] Servito alla stazione 2
+[UTENTE 1] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:1)
+[UTENTE 1] Simulazione terminata mentre ero in coda alla cassa
+[UTENTE 1] Servito alla stazione 0
+[UTENTE 1] Servito alla stazione 1
+[UTENTE 1] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:0)
+[UTENTE 1] Simulazione terminata mentre ero in coda alla cassa
+[UTENTE 1] Servito alla stazione 0
+[UTENTE 1] Servito alla stazione 1
+[UTENTE 1] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:0)
+[UTENTE 1] Simulazione terminata mentre ero in coda alla cassa
+[UTENTE 13] Servito alla stazione 0
+[UTENTE 13] Servito alla stazione 1
+[UTENTE 13] Servito alla stazione 2
+[UTENTE 13] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:1)
+[UTENTE 13] Simulazione terminata mentre ero in coda alla cassa
+[UTENTE 13] Servito alla stazione 0
+[UTENTE 13] Servito alla stazione 1
+[UTENTE 13] Servito alla stazione 2
+[UTENTE 13] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:1)
+[UTENTE 13] Simulazione terminata mentre ero in coda alla cassa
+[UTENTE 13] Servito alla stazione 0
+[UTENTE 13] Servito alla stazione 1
+[UTENTE 13] Servito alla stazione 2
+[UTENTE 13] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:1)
+[UTENTE 13] Simulazione terminata mentre ero in coda alla cassa
+[UTENTE 6] Servito alla stazione 0
+[UTENTE 6] Servito alla stazione 1
+[UTENTE 6] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:0)
+[UTENTE 6] Ha pagato alla cassa
+[UTENTE 6] Cerca un tavolo libero...
+[UTENTE 6] Posto a tavola acquisito (tavoli liberi ora: 19/30)
+[UTENTE 6] Ha finito di mangiare, lascia il tavolo
+[UTENTE 6] Tavolo liberato (tavoli liberi ora: 21/30)
+[UTENTE 6] Ha finito e lascia la mensa per oggi
+[UTENTE 6] Servito alla stazione 0
+[UTENTE 6] Servito alla stazione 1
+[UTENTE 6] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:0)
+[UTENTE 6] Ha pagato alla cassa
+[UTENTE 6] Cerca un tavolo libero...
+[UTENTE 6] Posto a tavola acquisito (tavoli liberi ora: 27/30)
+[UTENTE 6] Ha finito di mangiare, lascia il tavolo
+[UTENTE 6] Tavolo liberato (tavoli liberi ora: 24/30)
+[UTENTE 6] Ha finito e lascia la mensa per oggi
+[UTENTE 6] Servito alla stazione 0
+[UTENTE 6] Servito alla stazione 1
+[UTENTE 6] Simulazione terminata mentre ero in attesa
+[UTENTE 2] Servito alla stazione 0
+[UTENTE 2] Servito alla stazione 1
+[UTENTE 2] Servito alla stazione 2
+[UTENTE 2] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:1)
+[UTENTE 2] Simulazione terminata mentre ero in coda alla cassa
+[UTENTE 2] Servito alla stazione 0
+[UTENTE 2] Servito alla stazione 1
+[UTENTE 2] Simulazione terminata mentre ero in attesa
+[UTENTE 2] Servito alla stazione 0
+[UTENTE 2] Servito alla stazione 1
+[UTENTE 2] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:0)
+[UTENTE 2] Ha pagato alla cassa
+[UTENTE 2] Cerca un tavolo libero...
+[UTENTE 2] Posto a tavola acquisito (tavoli liberi ora: 21/30)
+[UTENTE 2] Ha finito di mangiare, lascia il tavolo
+[UTENTE 2] Tavolo liberato (tavoli liberi ora: 20/30)
+[UTENTE 2] Ha finito e lascia la mensa per oggi
+[UTENTE 14] Servito alla stazione 0
+[UTENTE 14] Servito alla stazione 1
+[UTENTE 14] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:0)
+[UTENTE 14] Ha pagato alla cassa
+[UTENTE 14] Cerca un tavolo libero...
+[UTENTE 14] Posto a tavola acquisito (tavoli liberi ora: 27/30)
+[UTENTE 14] Ha finito di mangiare, lascia il tavolo
+[UTENTE 14] Tavolo liberato (tavoli liberi ora: 18/30)
+[UTENTE 14] Ha finito e lascia la mensa per oggi
+[UTENTE 14] Servito alla stazione 0
+[UTENTE 14] Servito alla stazione 1
+[UTENTE 14] Simulazione terminata mentre ero in attesa
+[UTENTE 14] Servito alla stazione 0
+[UTENTE 14] Servito alla stazione 1
+[UTENTE 14] Servito alla stazione 2
+[UTENTE 14] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:1)
+[UTENTE 14] Simulazione terminata mentre ero in coda alla cassa
+[UTENTE 4] Servito alla stazione 0
+[UTENTE 4] Servito alla stazione 1
+[UTENTE 4] Servito alla stazione 2
+[UTENTE 4] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:1)
+[UTENTE 4] Simulazione terminata mentre ero in coda alla cassa
+[UTENTE 4] Servito alla stazione 0
+[UTENTE 4] Servito alla stazione 1
+[UTENTE 4] Servito alla stazione 2
+[UTENTE 4] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:1)
+[UTENTE 4] Simulazione terminata mentre ero in coda alla cassa
+[UTENTE 4] Servito alla stazione 0
+[UTENTE 4] Servito alla stazione 1
+[UTENTE 4] Simulazione terminata mentre ero in attesa
+[UTENTE 7] Servito alla stazione 0
+[UTENTE 7] Servito alla stazione 1
+[UTENTE 7] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:0)
+[UTENTE 7] Ha pagato alla cassa
+[UTENTE 7] Cerca un tavolo libero...
+[UTENTE 7] Posto a tavola acquisito (tavoli liberi ora: 26/30)
+[UTENTE 7] Ha finito di mangiare, lascia il tavolo
+[UTENTE 7] Tavolo liberato (tavoli liberi ora: 29/30)
+[UTENTE 7] Ha finito e lascia la mensa per oggi
+[UTENTE 7] Servito alla stazione 0
+[UTENTE 7] Servito alla stazione 1
+[UTENTE 7] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:0)
+[UTENTE 7] Simulazione terminata mentre ero in coda alla cassa
+[UTENTE 7] Servito alla stazione 0
+[UTENTE 7] Servito alla stazione 1
+[UTENTE 7] Servito alla stazione 2
+[UTENTE 7] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:1)
+[UTENTE 7] Simulazione terminata mentre ero in coda alla cassa
+[UTENTE 21] Servito alla stazione 0
+[UTENTE 21] Servito alla stazione 1
+[UTENTE 21] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:0)
+[UTENTE 21] Ha pagato alla cassa
+[UTENTE 21] Cerca un tavolo libero...
+[UTENTE 21] Posto a tavola acquisito (tavoli liberi ora: 24/30)
+[UTENTE 21] Ha finito di mangiare, lascia il tavolo
+[UTENTE 21] Tavolo liberato (tavoli liberi ora: 27/30)
+[UTENTE 21] Ha finito e lascia la mensa per oggi
+[UTENTE 21] Servito alla stazione 0
+[UTENTE 21] Servito alla stazione 1
+[UTENTE 21] Servito alla stazione 2
+[UTENTE 21] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:1)
+[UTENTE 21] Simulazione terminata mentre ero in coda alla cassa
+[UTENTE 21] Servito alla stazione 0
+[UTENTE 21] Servito alla stazione 1
+[UTENTE 21] Servito alla stazione 2
+[UTENTE 21] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:1)
+[UTENTE 21] Simulazione terminata mentre ero in coda alla cassa
+[UTENTE 28] Servito alla stazione 0
+[UTENTE 28] Servito alla stazione 1
+[UTENTE 28] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:0)
+[UTENTE 28] Ha pagato alla cassa
+[UTENTE 28] Cerca un tavolo libero...
+[UTENTE 28] Posto a tavola acquisito (tavoli liberi ora: 20/30)
+[UTENTE 28] Ha finito di mangiare, lascia il tavolo
+[UTENTE 28] Tavolo liberato (tavoli liberi ora: 22/30)
+[UTENTE 28] Ha finito e lascia la mensa per oggi
+[UTENTE 28] Servito alla stazione 0
+[UTENTE 28] Servito alla stazione 1
+[UTENTE 28] Servito alla stazione 2
+[UTENTE 28] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:1)
+[UTENTE 28] Simulazione terminata mentre ero in coda alla cassa
+[UTENTE 28] Servito alla stazione 0
+[UTENTE 28] Servito alla stazione 1
+[UTENTE 28] Simulazione terminata mentre ero in attesa
+[OPERATORE 5] Avviato su stazione 1
+[OPERATORE 5] Competizione per postazione alla stazione 1
+[OPERATORE 5] Postazione acquisita, inizio turno
+[OPERATORE 5] Fine turno giornaliero
+[OPERATORE 5] Competizione per postazione alla stazione 1
+[OPERATORE 5] Postazione acquisita, inizio turno
+[OPERATORE 5] Pausa 1/2 (postazioni ora: 1/2)
+[OPERATORE 5] Fine turno giornaliero
+[UTENTE 25] Servito alla stazione 0
+[UTENTE 25] Servito alla stazione 1
+[UTENTE 25] Servito alla stazione 2
+[UTENTE 25] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:1)
+[UTENTE 25] Simulazione terminata mentre ero in coda alla cassa
+[UTENTE 25] Servito alla stazione 0
+[UTENTE 25] Servito alla stazione 1
+[UTENTE 25] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:0)
+[UTENTE 25] Ha pagato alla cassa
+[UTENTE 25] Cerca un tavolo libero...
+[UTENTE 25] Posto a tavola acquisito (tavoli liberi ora: 29/30)
+[UTENTE 25] Ha finito di mangiare, lascia il tavolo
+[UTENTE 25] Tavolo liberato (tavoli liberi ora: 22/30)
+[UTENTE 25] Ha finito e lascia la mensa per oggi
+[UTENTE 25] Servito alla stazione 0
+[UTENTE 25] Servito alla stazione 1
+[UTENTE 25] Simulazione terminata mentre ero in attesa
+[UTENTE 8] Servito alla stazione 0
+[UTENTE 8] Servito alla stazione 1
+[UTENTE 8] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:0)
+[UTENTE 8] Ha pagato alla cassa
+[UTENTE 8] Cerca un tavolo libero...
+[UTENTE 8] Posto a tavola acquisito (tavoli liberi ora: 29/30)
+[UTENTE 8] Ha finito di mangiare, lascia il tavolo
+[UTENTE 8] Tavolo liberato (tavoli liberi ora: 20/30)
+[UTENTE 8] Ha finito e lascia la mensa per oggi
+[UTENTE 8] Servito alla stazione 0
+[UTENTE 8] Servito alla stazione 1
+[UTENTE 8] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:0)
+[UTENTE 8] Ha pagato alla cassa
+[UTENTE 8] Cerca un tavolo libero...
+[UTENTE 8] Posto a tavola acquisito (tavoli liberi ora: 25/30)
+[UTENTE 8] Ha finito di mangiare, lascia il tavolo
+[UTENTE 8] Tavolo liberato (tavoli liberi ora: 25/30)
+[UTENTE 8] Ha finito e lascia la mensa per oggi
+[UTENTE 8] Servito alla stazione 0
+[UTENTE 8] Servito alla stazione 1
+[UTENTE 8] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:0)
+[UTENTE 8] Ha pagato alla cassa
+[UTENTE 8] Cerca un tavolo libero...
+[UTENTE 8] Posto a tavola acquisito (tavoli liberi ora: 28/30)
+[UTENTE 8] Ha finito di mangiare, lascia il tavolo
+[UTENTE 8] Tavolo liberato (tavoli liberi ora: 26/30)
+[UTENTE 8] Ha finito e lascia la mensa per oggi
+[OPERATORE 0] Avviato su stazione 0
+[OPERATORE 0] Competizione per postazione alla stazione 0
+[OPERATORE 0] Postazione acquisita, inizio turno
+[OPERATORE 0] Pausa 1/2 (postazioni ora: 2/4)
+[OPERATORE 0] Fine turno giornaliero
+[OPERATORE 0] Competizione per postazione alla stazione 0
+[OPERATORE 0] Postazione acquisita, inizio turno
+[OPERATORE 0] Fine turno giornaliero
+[OPERATORE 0] Competizione per postazione alla stazione 0
+[OPERATORE 0] Postazione acquisita, inizio turno
+[OPERATORE 0] Fine turno giornaliero
+[UTENTE 26] Servito alla stazione 0
+[UTENTE 26] Servito alla stazione 1
+[UTENTE 26] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:0)
+[UTENTE 26] Ha pagato alla cassa
+[UTENTE 26] Cerca un tavolo libero...
+[UTENTE 26] Posto a tavola acquisito (tavoli liberi ora: 21/30)
+[UTENTE 26] Ha finito di mangiare, lascia il tavolo
+[UTENTE 26] Tavolo liberato (tavoli liberi ora: 19/30)
+[UTENTE 26] Ha finito e lascia la mensa per oggi
+[UTENTE 26] Servito alla stazione 0
+[UTENTE 26] Servito alla stazione 1
+[UTENTE 26] Simulazione terminata mentre ero in attesa
+[UTENTE 26] Servito alla stazione 0
+[UTENTE 26] Servito alla stazione 1
+[UTENTE 26] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:0)
+[UTENTE 26] Ha pagato alla cassa
+[UTENTE 26] Cerca un tavolo libero...
+[UTENTE 26] Posto a tavola acquisito (tavoli liberi ora: 25/30)
+[UTENTE 26] Ha finito di mangiare, lascia il tavolo
+[UTENTE 26] Tavolo liberato (tavoli liberi ora: 27/30)
+[UTENTE 26] Ha finito e lascia la mensa per oggi
+[UTENTE 0] Servito alla stazione 0
+[UTENTE 0] Servito alla stazione 1
+[UTENTE 0] Servito alla stazione 2
+[UTENTE 0] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:1)
+[UTENTE 0] Simulazione terminata mentre ero in coda alla cassa
+[UTENTE 0] Servito alla stazione 0
+[UTENTE 0] Servito alla stazione 1
+[UTENTE 0] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:0)
+[UTENTE 0] Ha pagato alla cassa
+[UTENTE 0] Cerca un tavolo libero...
+[UTENTE 0] Posto a tavola acquisito (tavoli liberi ora: 26/30)
+[UTENTE 0] Ha finito di mangiare, lascia il tavolo
+[UTENTE 0] Tavolo liberato (tavoli liberi ora: 23/30)
+[UTENTE 0] Ha finito e lascia la mensa per oggi
+[UTENTE 0] Servito alla stazione 0
+[UTENTE 0] Servito alla stazione 1
+[UTENTE 0] Simulazione terminata mentre ero in attesa
+[UTENTE 19] Servito alla stazione 0
+[UTENTE 19] Servito alla stazione 1
+[UTENTE 19] Servito alla stazione 2
+[UTENTE 19] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:1)
+[UTENTE 19] Simulazione terminata mentre ero in coda alla cassa
+[UTENTE 19] Servito alla stazione 0
+[UTENTE 19] Servito alla stazione 1
+[UTENTE 19] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:0)
+[UTENTE 19] Simulazione terminata mentre ero in coda alla cassa
+[UTENTE 19] Servito alla stazione 0
+[UTENTE 19] Servito alla stazione 1
+[UTENTE 19] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:0)
+[UTENTE 19] Ha pagato alla cassa
+[UTENTE 19] Cerca un tavolo libero...
+[UTENTE 19] Posto a tavola acquisito (tavoli liberi ora: 22/30)
+[UTENTE 19] Ha finito di mangiare, lascia il tavolo
+[UTENTE 19] Tavolo liberato (tavoli liberi ora: 30/30)
+[UTENTE 19] Ha finito e lascia la mensa per oggi
+[UTENTE 9] Servito alla stazione 0
+[UTENTE 9] Servito alla stazione 1
+[UTENTE 9] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:0)
+[UTENTE 9] Ha pagato alla cassa
+[UTENTE 9] Cerca un tavolo libero...
+[UTENTE 9] Posto a tavola acquisito (tavoli liberi ora: 16/30)
+[UTENTE 9] Ha finito di mangiare, lascia il tavolo
+[UTENTE 9] Tavolo liberato (tavoli liberi ora: 24/30)
+[UTENTE 9] Ha finito e lascia la mensa per oggi
+[UTENTE 9] Servito alla stazione 0
+[UTENTE 9] Servito alla stazione 1
+[UTENTE 9] Simulazione terminata mentre ero in attesa
+[UTENTE 9] Servito alla stazione 0
+[UTENTE 9] Servito alla stazione 1
+[UTENTE 9] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:0)
+[UTENTE 9] Ha pagato alla cassa
+[UTENTE 9] Cerca un tavolo libero...
+[UTENTE 9] Posto a tavola acquisito (tavoli liberi ora: 24/30)
+[UTENTE 9] Ha finito di mangiare, lascia il tavolo
+[UTENTE 9] Tavolo liberato (tavoli liberi ora: 28/30)
+[UTENTE 9] Ha finito e lascia la mensa per oggi
+[OPERATORE 9] Avviato su stazione 1
+[OPERATORE 9] Competizione per postazione alla stazione 1
+[OPERATORE 9] Postazione acquisita, inizio turno
+[OPERATORE 9] Fine turno giornaliero
+[OPERATORE 9] Competizione per postazione alla stazione 1
+[OPERATORE 9] Postazione acquisita, inizio turno
+[OPERATORE 9] Fine turno giornaliero
+[OPERATORE 9] Competizione per postazione alla stazione 1
+[OPERATORE 9] Postazione acquisita, inizio turno
+[OPERATORE 9] Fine turno giornaliero
+[UTENTE 22] Servito alla stazione 0
+[UTENTE 22] Servito alla stazione 1
+[UTENTE 22] Servito alla stazione 2
+[UTENTE 22] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:1)
+[UTENTE 22] Simulazione terminata mentre ero in coda alla cassa
+[UTENTE 22] Servito alla stazione 0
+[UTENTE 22] Servito alla stazione 1
+[UTENTE 22] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:0)
+[UTENTE 22] Ha pagato alla cassa
+[UTENTE 22] Cerca un tavolo libero...
+[UTENTE 22] Posto a tavola acquisito (tavoli liberi ora: 28/30)
+[UTENTE 22] Ha finito di mangiare, lascia il tavolo
+[UTENTE 22] Tavolo liberato (tavoli liberi ora: 26/30)
+[UTENTE 22] Ha finito e lascia la mensa per oggi
+[UTENTE 22] Servito alla stazione 0
+[UTENTE 22] Servito alla stazione 1
+[UTENTE 22] Va alla cassa per pagare (Primo:1 Secondo:1 Coffee:0)
+[UTENTE 22] Ha pagato alla cassa
+[UTENTE 22] Cerca un tavolo libero...
+[UTENTE 22] Posto a tavola acquisito (tavoli liberi ora: 23/30)
+[UTENTE 22] Ha finito di mangiare, lascia il tavolo
+[UTENTE 22] Tavolo liberato (tavoli liberi ora: 29/30)
+[UTENTE 22] Ha finito e lascia la mensa per oggi
+di:                 75
+
+Tempi medi di attesa (ms):
+  Stazione primi:          57 ms
+  Stazione secondi:        14 ms
+  Stazione coffee:         6 ms
+  Cassa:                   12 ms
+
+Operatori attivi:          10
+Pause totali:              0
+
+Ricavo giornaliero:        193.80 €
+===========================================================
+
+
+========================================================
+          TERMINAZIONE SIMULAZIONE
+========================================================
+CAUSA: TIMEOUT - Durata simulazione completata
+Giorni simulati: 3/3
+========================================================
+
+
+================== STATISTICHE FINALI ==================
+
+UTENTI:
+Utenti serviti totali:     60
+Utenti non serviti totali: 55
+Utenti serviti in media al giorno:     20.00
+Utenti non serviti in media al giorno: 18.33
+
+PIATTI DISTRIBUITI:
+Totali:                  226
+  Primi:                 90
+  Secondi:               90
+  Coffee/Dolci:          46
+
+Piatti distribuiti in media al giorno:
+Totali:                  75.33
+  Primi:                 30.00
+  Secondi:               30.00
+  Coffee/Dolci:          15.33
+
+PIATTI AVANZATI:
+Totali:                  450
+  Primi:                 225
+  Secondi:               225
+
+Piatti avanzati in media al giorno:
+Totali:                  150.00
+  Primi:                 75.00
+  Secondi:               75.00
+
+TEMPI MEDI DI ATTESA:
+Tempo medio complessivo:     22 ms
+  Stazione primi:            31 ms
+  Stazione secondi:          33 ms
+  Stazione coffee:           12 ms
+  Cassa:                     14 ms
+
+OPERATORI:
+Operatori attivi totali:     30
+Pause totali:                6
+Pause medie per giornata:    2.00
+
+RICAVI:
+Ricavo totale:               651.60 €
+Ricavo medio per giornata:   217.20 €
+=========================================================
+
+[MENSA] Terminazione processi figli...
+[MENSA] Deallocazione IPC...

@@ -66,10 +66,11 @@ static void user_loop(void) {
             break;
         }
 
-        /* Criterio: ogni giorno vuole un primo e un secondo (obbligatori) */
-        /* Il caffè è opzionale (decisione casuale) */
-        want_primo   = 1;
-        want_secondo = 1;
+        //l'utente vuole il primo o il secondo o entrambi
+        do {
+            want_primo   = rand_range(0, 1);
+            want_secondo = rand_range(0, 1);
+        } while (want_primo == 0 && want_secondo == 0);
         want_coffee  = rand_range(0, 1); // coffee opzionale ogni giorno
         
         got_primo   = 0;
@@ -122,7 +123,9 @@ static void user_loop(void) {
         if (end_day_while_waiting() == 1) continue;
 
         if (!go_to_cassa()) {
-            printf("[UTENTE %d] Impossibile pagare, abbandono il giorno\n", user_id);
+            if(shm->simulation_running) {
+                printf("[UTENTE %d] Impossibile pagare, abbandono il giorno\n", user_id);
+            }
             sem_wait(&shm->sem_stats);
             shm->stats_giorno.utenti_non_serviti++;
             shm->stats_giorno.utenti_in_attesa++;
@@ -142,6 +145,9 @@ static void user_loop(void) {
         __sync_fetch_and_add(&shm->day_barrier_count, 1);
         printf("[UTENTE %d] Ha finito e lascia la mensa per oggi\n", user_id);
         
+        sem_wait(&shm->sem_stats);
+        shm->stats_giorno.utenti_serviti++;
+        sem_post(&shm->sem_stats);
         while (shm->day_barrier_count < shm->NOFUSERS && shm->simulation_running) {
             nanosleep(&(struct timespec){0, 10000000}, NULL);
         }
